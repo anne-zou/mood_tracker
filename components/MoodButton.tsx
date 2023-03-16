@@ -2,7 +2,7 @@ import React from "react";
 import { View, Button, StyleSheet, TextProps } from "react-native";
 
 const styles = StyleSheet.create({
-  moodButton: {
+  root: {
     padding: 12,
   },
 });
@@ -14,7 +14,7 @@ interface Props {
 export default function MoodButton(props: Props) {
   const { title } = props;
   return (
-    <View style={styles.moodButton}>
+    <View style={styles.root}>
       <Button title={title as string} />
     </View>
   );

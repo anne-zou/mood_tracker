@@ -1,75 +1,68 @@
 import React, { useState } from "react";
-import { Button, View, Text, StyleSheet } from "react-native";
+import { Button, View, Text, StyleSheet, ButtonProps } from "react-native";
 import RecordMoodPage from "./RecordMoodPage";
 
 const styles = StyleSheet.create({
-  tab: {
+  root: {
+    flex: 1,
+    flexDirection: "column",
+  },
+  body: {
+    backgroundColor: "lightgreen",
+    flex: 7,
+  },
+  page: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+  },
+  footer: {
+    backgroundColor: "green",
+    flex: 1,
+    flexDirection: "row",
+    height: 50,
+  },
+  tabItem: {
     alignItems: "center",
     flex: 1,
     paddingTop: 12,
   },
 });
 
-export default function Layout() {
-  const [tab, setTab] = useState(Tabs.RecordMood);
-
-  return (
-    <View style={{ flex: 1, flexDirection: "column" }}>
-      <View style={{ flex: 7, backgroundColor: "lightgreen" }}>
-        {tab == Tabs.RecordMood ? (
-          <RecordMoodPage style={{ flex: 1 }} />
-        ) : (
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text>Under construction :)</Text>
-          </View>
-        )}
-      </View>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "green",
-          flexDirection: "row",
-          height: 50,
-        }}
-      >
-        <View style={styles.tab}>
-          <Button
-            color="white"
-            title="Record Mood"
-            onPress={() => setTab(Tabs.RecordMood)}
-          />
-          {/* <Text>New Mood</Text> */}
-        </View>
-        <View style={styles.tab}>
-          <Button
-            color="white"
-            title="Mood Log"
-            onPress={() => setTab(Tabs.MoodLog)}
-          />
-          {/* <Text>Mood Log</Text> */}
-        </View>
-        <View style={styles.tab}>
-          <Button
-            color="white"
-            title="Mood Graph"
-            onPress={() => setTab(Tabs.MoodGraph)}
-          />
-          {/* <Text>Time Graph</Text> */}
-        </View>
-      </View>
-    </View>
-  );
-}
-
-enum Tabs {
+enum Tab {
   RecordMood,
   MoodLog,
   MoodGraph,
+}
+
+export default function Layout() {
+  const [tab, setTab] = useState(Tab.RecordMood);
+
+  const TabItem = (props: { title: string; tab: Tab }) => {
+    const { title, tab } = props;
+    return (
+      <View style={styles.tabItem}>
+        <Button color="white" title={title} onPress={() => setTab(tab)} />
+      </View>
+    );
+  };
+
+  return (
+    <View style={styles.root}>
+      <View style={styles.body}>
+        {tab == Tab.RecordMood ? (
+          <RecordMoodPage style={styles.page} />
+        ) : (
+          <View style={styles.page}>
+            <Text>{"Under construction :)"}</Text>
+          </View>
+        )}
+      </View>
+      <View style={styles.footer}>
+        <TabItem title="Record Mood" tab={Tab.RecordMood} />
+        <TabItem title="Mood Log" tab={Tab.MoodLog} />
+        <TabItem title="Mood Graph" tab={Tab.MoodGraph} />
+      </View>
+    </View>
+  );
 }

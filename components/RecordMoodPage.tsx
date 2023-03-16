@@ -1,6 +1,18 @@
 import React from "react";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 import MoodButton from "./MoodButton";
+
+const styles = StyleSheet.create({
+  root: {
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  row: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+});
 
 interface Props {
   style: any;
@@ -9,24 +21,14 @@ interface Props {
 export default function RecordMoodPage(props: Props) {
   const { style } = props;
   return (
-    <View
-      style={{ flexDirection: "column", justifyContent: "center", ...style }}
-    >
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}
-      >
-        <MoodButton title="Excited" />
+    <View style={{ ...styles.root, ...style }}>
+      <View style={styles.row}>
+        <MoodButton title="Manic" />
+        <MoodButton title="Happy" />
         <MoodButton title="Neutral" />
-        <MoodButton title="Content" />
-        <MoodButton title="Tired" />
-        <MoodButton title="Angry" />
-        <MoodButton title="Guilty" />
-        <MoodButton title="Anxious" />
         <MoodButton title="Depressed" />
+        <MoodButton title="Angry" />
+        <MoodButton title="Tired" />
       </View>
     </View>
   );
