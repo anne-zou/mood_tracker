@@ -1,24 +1,44 @@
-import React from "react";
+// @flow
+declare var emit: (key: any, value?: any) => void;
+import React, { useEffect } from "react";
 import Layout from "./components/Layout";
-import { Provider } from "react-redux";
-import store from "./store/redux_store";
-import Realm from "realm";
-import {
-  MoodEntrySchema,
-  MOOD_ENTRY_SCHEMA_KEY,
-} from "./database/realm_schemas";
+import db from "./database/db";
 
-const realmConfig = {
-  path: "./database/data.realm",
-  schema: [MoodEntrySchema],
-  schemaVersion: 0,
+type MoodEntry = {
+  _id: number,
+  timestamp: number,
+  mood: string,
+  intensity: number,
 };
 
-export default function App() {
-  useEffect(async () => {
-    await Realm.open(realmConfig);
+export default function App(): React$Node {
+  useEffect(() => {
+    // Create a design document for querying MoodEntry objects by timestamp
+    const createDesignDocument = async () => {
+      try {
+        await db.put({
+          _id: "_design/mood_entry_by_timestamp",
+          views: {
+            "mood_entry_by_timestamp": {
+              map: function (moodEntry: MoodEntry) {
+                if (moodEntry.timestamp) {
+                  emit(moodEntry.timestamp);
+                }
+              }.toString(),
+            },
+          },
+        });
+      } catch (error) {
+        if (error.name !== "conflict") {
+          console.error("Error creating design document:", error);
+        }
+      }
+    };
+
+    createDesignDocument();
   }, []);
-  return <Provider store={store}>
+
+  return (
     <Layout />
-  </Provider>;
+  );
 }

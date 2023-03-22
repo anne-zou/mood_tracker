@@ -1,3 +1,4 @@
+// @flow
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import MoodButton from "./MoodButton";
@@ -18,7 +19,7 @@ interface Props {
   style: any;
 }
 
-export default function RecordMoodPage(props: Props) {
+export default function RecordMoodPage(props: Props): React$Node {
   const { style } = props;
   return (
     <View style={{ ...styles.root, ...style }}>

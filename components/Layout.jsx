@@ -1,5 +1,6 @@
+// @flow
 import React, { useState } from "react";
-import { Button, View, Text, StyleSheet, ButtonProps } from "react-native";
+import { Button, View, Text, StyleSheet } from "react-native";
 import RecordMoodPage from "./RecordMoodPage";
 
 const styles = StyleSheet.create({
@@ -35,7 +36,7 @@ enum Tab {
   MoodGraph,
 }
 
-export default function Layout() {
+export default function Layout(): React$Node {
   const [tab, setTab] = useState(Tab.RecordMood);
 
   const TabItem = (props: { title: string; tab: Tab }) => {
@@ -50,7 +51,7 @@ export default function Layout() {
   return (
     <View style={styles.root}>
       <View style={styles.body}>
-        {tab == Tab.RecordMood ? (
+        {tab === Tab.RecordMood ? (
           <RecordMoodPage style={styles.page} />
         ) : (
           <View style={styles.page}>
