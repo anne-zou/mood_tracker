@@ -2,6 +2,18 @@ import { useState, useEffect, useRef } from 'react'
 
 const Timeline = ({ events, eventTypes, setEvents }) => {
   console.log('Timeline component rendered with eventTypes:', eventTypes)
+  
+  // Helper function to get current local time in datetime-local format
+  const getCurrentLocalTime = () => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const hours = String(now.getHours()).padStart(2, '0')
+    const minutes = String(now.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  }
+
   const [selectedTypes, setSelectedTypes] = useState([])
   const [sortOrder, setSortOrder] = useState('newest')
   
@@ -21,7 +33,7 @@ const Timeline = ({ events, eventTypes, setEvents }) => {
   const [editingEvent, setEditingEvent] = useState(null)
   const [formData, setFormData] = useState({
     eventType: '',
-    eventTime: new Date().toISOString().slice(0, 16),
+    eventTime: getCurrentLocalTime(),
     eventDetails: {},
     detailToDisplay: ''
   })
@@ -456,7 +468,7 @@ const Timeline = ({ events, eventTypes, setEvents }) => {
           setEditingEvent(null)
           setFormData({
             eventType: '',
-            eventTime: new Date().toISOString().slice(0, 16),
+            eventTime: getCurrentLocalTime(),
             eventDetails: {},
             detailToDisplay: ''
           })
