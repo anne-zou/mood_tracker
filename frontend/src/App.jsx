@@ -24,7 +24,8 @@ function App() {
         { eventType: 'Mood', color: '#582F0E' }, // Dark Brown
         { eventType: 'Food', color: '#936639' }, // Golden Brown
         { eventType: 'Sleep', color: '#656D4A' }, // Forest Green
-        { eventType: 'Exercise', color: '#A4AC86' }, // Olive Green
+        { eventType: 'Wake', color: '#A4AC86' }, // Olive Green
+        { eventType: 'Exercise', color: '#4D908E' }, // Teal
         { eventType: 'Meds', color: '#7F4F24' } // Medium Brown
       ]
       localStorage.setItem('eventTypes', JSON.stringify(defaultEventTypes))

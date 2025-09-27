@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import ActionButtons from './ActionButtons'
 
 const Timeline = ({ events, eventTypes, setEvents }) => {
   console.log('Timeline component rendered with eventTypes:', eventTypes)
@@ -123,6 +124,7 @@ const Timeline = ({ events, eventTypes, setEvents }) => {
       eventType: formData.eventType,
       eventTime: formData.eventTime,
       createdAt: editingEvent ? editingEvent.createdAt : new Date().toISOString(),
+      lastModified: new Date().toISOString(),
       eventDetails: formData.eventDetails,
       detailToDisplay: formData.detailToDisplay
     }
@@ -387,19 +389,18 @@ const Timeline = ({ events, eventTypes, setEvents }) => {
         <div className="timeline-content">
           {Object.entries(groupedEvents).map(([date, dayEvents]) => (
             <div key={date} className="timeline-day">
-              <div className="timeline-date-header">
-                <h3>{formatDate(dayEvents[0].eventTime)}</h3>
-                <span className="event-count">{dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}</span>
-              </div>
+              <p className="timeline-date-header">
+                {formatDate(dayEvents[0].eventTime)}
+              </p>
               
               <div className="timeline-events">
                 {dayEvents.map((event, index) => (
-                  <div key={event.eventID} className="timeline-event">
+                  <div 
+                    key={event.eventID} 
+                    className="timeline-event"
+                    style={{ backgroundColor: getEventTypeColor(event.eventType) }}
+                  >
                     <div className="timeline-event-marker">
-                      <div 
-                        className="timeline-event-dot"
-                        style={{ backgroundColor: getEventTypeColor(event.eventType) }}
-                      ></div>
                       {index < dayEvents.length - 1 && (
                         <div className="timeline-event-line"></div>
                       )}
@@ -407,40 +408,35 @@ const Timeline = ({ events, eventTypes, setEvents }) => {
                     
                     <div className="timeline-event-content">
                       <div className="timeline-event-header">
-                        <div className="timeline-event-info">
-                          <h4>{event.eventType}</h4>
+                        <div className="timeline-event-main">
+                          <div className="timeline-event-title-row">
+                            <h4>{event.eventType}</h4>
+                            {event.detailToDisplay && (
+                              <span className="timeline-event-display">
+                                {event.detailToDisplay}
+                              </span>
+                            )}
+                          </div>
                           <div className="timeline-event-times">
                             <span className="timeline-event-time">
                               {formatTime(event.eventTime)}
                             </span>
-                            {event.createdAt !== event.eventTime && (
+                            {event.lastModified && event.lastModified !== event.createdAt ? (
+                              <span className="timeline-event-modified">
+                                (edited {formatTime(event.lastModified)})
+                              </span>
+                            ) : event.createdAt !== event.eventTime && (
                               <span className="timeline-event-created">
                                 (recorded {formatTime(event.createdAt)})
                               </span>
                             )}
                           </div>
                         </div>
-                        <div className="timeline-event-actions">
-                          <button 
-                            className="btn btn-small btn-secondary"
-                            onClick={() => handleEdit(event)}
-                          >
-                            Edit
-                          </button>
-                          <button 
-                            className="btn btn-small btn-danger"
-                            onClick={() => handleDelete(event.eventID)}
-                          >
-                            Delete
-                          </button>
-                        </div>
+                        <ActionButtons 
+                          onEdit={() => handleEdit(event)}
+                          onDelete={() => handleDelete(event.eventID)}
+                        />
                       </div>
-                      
-                      {event.detailToDisplay && (
-                        <p className="timeline-event-display">
-                          {event.detailToDisplay}
-                        </p>
-                      )}
                       
                       {Object.keys(event.eventDetails).length > 0 && (
                         <div className="timeline-event-details">

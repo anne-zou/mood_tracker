@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ActionButtons from './ActionButtons'
 
 const EventTypeManager = ({ eventTypes, setEventTypes, events, setEvents }) => {
   const [isCreating, setIsCreating] = useState(false)
@@ -17,7 +18,18 @@ const EventTypeManager = ({ eventTypes, setEventTypes, events, setEvents }) => {
     { name: 'Olive Green', value: '#A4AC86' },
     { name: 'Forest Green', value: '#656D4A' },
     { name: 'Dark Olive', value: '#414833' },
-    { name: 'Deep Forest', value: '#333D29' }
+    { name: 'Deep Forest', value: '#333D29' },
+    { name: 'Teal', value: '#4D908E' },
+    { name: 'Saddle Brown', value: '#8B4513' },
+    { name: 'Dark Forest Green', value: '#2F4F2F' },
+    { name: 'Olive Drab', value: '#6B8E23' },
+    { name: 'Warm Brown', value: '#8B7355' },
+    { name: 'Moss Green', value: '#5B7C3A' },
+    { name: 'Coffee', value: '#6F4E37' },
+    { name: 'Tan', value: '#8B6F47' },
+    { name: 'Mustard', value: '#9C7C38' },
+    { name: 'Sienna', value: '#A0522D' },
+    { name: 'Charcoal', value: '#4A4A4A' }
   ]
 
   const handleCreateEdit = () => {
@@ -135,26 +147,11 @@ const EventTypeManager = ({ eventTypes, setEventTypes, events, setEvents }) => {
           >
             <div className="event-type-header">
               <p>{type.eventType}</p>
-              <div className="event-type-actions">
-                <button 
-                  className="event-type-action-btn edit-btn"
-                  onClick={() => handleEdit(type.eventType)}
-                  title="Edit"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                  </svg>
-                </button>
-                <button 
-                  className="event-type-action-btn delete-btn"
-                  onClick={() => handleDelete(type.eventType)}
-                  title="Delete"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                  </svg>
-                </button>
-              </div>
+              <ActionButtons 
+                onEdit={() => handleEdit(type.eventType)}
+                onDelete={() => handleDelete(type.eventType)}
+                size="small"
+              />
             </div>
           </div>
           ))

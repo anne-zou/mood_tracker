@@ -458,53 +458,6 @@
   gap: 0.5rem;
 }
 
-.event-type-action-btn {
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 32px !important;
-  min-height: 32px !important;
-  border-radius: 50% !important;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-  padding: 0 !important;
-  margin: 0 !important;
-  box-sizing: border-box;
-}
-
-.event-type-action-btn svg {
-  width: 16px;
-  height: 16px;
-  fill: white;
-  stroke: none;
-  display: block;
-}
-
-.edit-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-}
-
-.edit-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
-}
-
-.delete-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-}
-
-.delete-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
-}
 
 
 .schema-fields {
@@ -940,20 +893,41 @@
 }
 
 .timeline-date-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 0.75rem;
-  backdrop-filter: blur(10px);
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  position: relative;
+  padding: 0 1rem;
 }
 
-.timeline-date-header h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
+.timeline-date-header::before,
+.timeline-date-header::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.timeline-date-header::before {
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.timeline-date-header::after {
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.timeline-date-header::before {
+  width: calc(50% - 2rem);
+}
+
+.timeline-date-header::after {
+  width: calc(50% - 2rem);
 }
 
 .event-count {
@@ -974,6 +948,10 @@
   gap: 1rem;
   margin-bottom: 2rem;
   position: relative;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .timeline-event-marker {
@@ -1000,11 +978,6 @@
 
 .timeline-event-content {
   flex-grow: 1;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .timeline-event-header {
@@ -1012,47 +985,135 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.5rem;
+  gap: 1rem;
 }
 
-.timeline-event-info {
+.timeline-event-main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
-.timeline-event-actions {
+.timeline-event-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+
+.timeline-event .btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.timeline-event .btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.timeline-event .btn-danger {
+  background: rgba(239, 68, 68, 0.8);
+  border-color: rgba(239, 68, 68, 0.9);
+}
+
+.timeline-event .btn-danger:hover {
+  background: rgba(239, 68, 68, 0.9);
+  border-color: rgba(239, 68, 68, 1);
+}
+
+/* Action Buttons Component */
+.action-buttons {
   display: flex;
   gap: 0.5rem;
-  margin-left: 1rem;
+  align-items: center;
+}
+
+.action-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  min-width: 2rem;
+  min-height: 2rem;
+  flex-shrink: 0;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.action-btn svg {
+  width: 1rem;
+  height: 1rem;
+  fill: white;
+  stroke: none;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.action-btn.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.8);
+}
+
+.action-btn.small {
+  width: 1.5rem;
+  height: 1.5rem;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+}
+
+.action-btn.small svg {
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 .timeline-event-header h4 {
   margin: 0;
-  color: #1f2937;
+  color: white;
   font-size: 1.125rem;
 }
 
 .timeline-event-times {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.25rem;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .timeline-event-time {
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.875rem;
   font-weight: 500;
 }
 
 .timeline-event-created {
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.timeline-event-modified {
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.75rem;
   font-style: italic;
 }
 
 .timeline-event-display {
-  margin: 0 0 1rem 0;
-  color: #374151;
+  color: rgba(255, 255, 255, 0.8);
   font-style: italic;
+  font-size: 0.9rem;
 }
 
 .timeline-event-details {
@@ -1062,7 +1123,7 @@
 }
 
 .timeline-detail-item {
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.875rem;
 }
 
