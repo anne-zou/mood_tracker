@@ -1,143 +1,27 @@
-import { useState } from 'react';
+import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import { INPUT_HEIGHT, INPUT_RADIUS } from './styles/inputStyles';
-import EmojiRow from './components/EmojiRow';
-import MoodInputBar from './components/MoodInputBar';
-import MoodMessageList, { MoodEntry } from './components/MoodMessageList';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { DARK_NEUTRAL, GRAY_TEXT, SCREEN_BACKGROUND } from './styles/colors';
 
-const grayText = '#7a7a7a';
-const baseTextSize = 15;
-const screenBackground = '#f6f5f2';
-
-export default function HomeScreen() {
-  const [entries, setEntries] = useState<MoodEntry[]>([]);
-  const [input, setInput] = useState('');
-  const [emojis, setEmojis] = useState(['🙂', '😩', '😠', '🥱']);
-  const [isEditingEmojis, setIsEditingEmojis] = useState(false);
-  const [emojiInput, setEmojiInput] = useState(emojis.join(' '));
-  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
-  const [editingEntryText, setEditingEntryText] = useState('');
-
-  const handleSend = () => {
-    const trimmed = input.trim();
-    if (!trimmed) {
-      return;
-    }
-    const now = Date.now();
-    setEntries((prev) => [{ id: `${now}`, text: trimmed, createdAt: now }, ...prev]);
-    setInput('');
-  };
-
-  const handleAddEmoji = (emoji: string) => {
-    setInput((prev) => (prev ? `${prev} ${emoji}` : emoji));
-  };
-
-  const handleStartEditEntry = (entry: MoodEntry) => {
-    setEditingEntryId(entry.id);
-    setEditingEntryText(entry.text);
-  };
-
-  const handleSaveEditEntry = () => {
-    if (!editingEntryId) {
-      return;
-    }
-    setEntries((prev) =>
-      prev.map((entry) =>
-        entry.id === editingEntryId ? { ...entry, text: editingEntryText.trim() } : entry
-      )
-    );
-    setEditingEntryId(null);
-  };
-
-  const handleDeleteEntry = (entryId: string) => {
-    setEntries((prev) => prev.filter((entry) => entry.id !== entryId));
-  };
-
-  const formatEmojiInput = (value: string) => sanitizeEmojis(value).join(' ');
-
-  const handleEditEmojis = () => {
-    setEmojiInput(emojis.join(' '));
-    setIsEditingEmojis(true);
-  };
-
-  const sanitizeEmojis = (value: string) => {
-    const emojiRegex = /\p{Extended_Pictographic}/u;
-    return Array.from(value).filter((char) => emojiRegex.test(char));
-  };
-
-  const handleEmojiInputChange = (value: string) => {
-    setEmojiInput(formatEmojiInput(value));
-  };
-
-  const handleSaveEmojis = () => {
-    const nextEmojis = sanitizeEmojis(emojiInput);
-    setEmojis(nextEmojis);
-    setIsEditingEmojis(false);
-  };
-
+export default function AuthLandingScreen() {
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.inner}
-        behavior={Platform.select({ ios: 'padding', android: undefined })}
-      >
-        <MoodMessageList
-          entries={entries}
-          emptyText="How are you feeling?"
-          textColor={grayText}
-          textSize={baseTextSize}
-          editingId={editingEntryId}
-          editingText={editingEntryText}
-          onChangeEditingText={setEditingEntryText}
-          onStartEdit={handleStartEditEntry}
-          onSaveEdit={handleSaveEditEntry}
-          onDelete={handleDeleteEntry}
-        />
-
-        <MoodInputBar
-          value={input}
-          onChangeText={setInput}
-          onSubmit={handleSend}
-          placeholder="Enter your mood..."
-          placeholderTextColor={grayText}
-          textSize={baseTextSize}
-          backgroundColor={screenBackground}
-          inputBackgroundColor="#ffffff"
-          inputTextColor="#1f2933"
-        />
-        {isEditingEmojis ? (
-          <View style={styles.emojiEditRow}>
-            <Text style={styles.emojiEditLabel}>Edit emojis:</Text>
-            <TextInput
-              value={emojiInput}
-              onChangeText={handleEmojiInputChange}
-              style={styles.emojiEditInput}
-              returnKeyType="done"
-              onSubmitEditing={handleSaveEmojis}
-            />
-            <Pressable style={styles.emojiEditSaveButton} onPress={handleSaveEmojis}>
-              <Text style={styles.emojiEditSaveIcon}>✓</Text>
+      <View style={styles.inner}>
+        <Text style={styles.title}>Mood Logger</Text>
+        <Text style={styles.subtitle}>Log in or create an account to get started.</Text>
+        <View style={styles.actions}>
+          <Link href="/auth/login" asChild>
+            <Pressable style={styles.primaryButton}>
+              <Text style={styles.primaryButtonText}>Log in</Text>
             </Pressable>
-          </View>
-        ) : (
-          <EmojiRow
-            emojis={emojis}
-            onEmojiPress={handleAddEmoji}
-            onActionPress={handleEditEmojis}
-            actionIcon="✎"
-            actionIconColor={grayText}
-          />
-        )}
-      </KeyboardAvoidingView>
+          </Link>
+          <Link href="/auth/signup" asChild>
+            <Pressable style={styles.secondaryButton}>
+              <Text style={styles.secondaryButtonText}>Create account</Text>
+            </Pressable>
+          </Link>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -145,38 +29,50 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: screenBackground,
+    backgroundColor: SCREEN_BACKGROUND,
   },
   inner: {
     flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'center',
   },
-  emojiEditRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingBottom: 12,
+  title: {
+    fontSize: 28,
+    fontWeight: '600',
+    color: GRAY_TEXT,
+    marginBottom: 24,
+    textAlign: 'center',
   },
-  emojiEditLabel: {
-    fontSize: baseTextSize,
-    color: grayText,
-    paddingLeft: 12,
-  },
-  emojiEditInput: {
-    flex: 1,
-    height: INPUT_HEIGHT,
-    borderRadius: INPUT_RADIUS,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 12,
-    fontSize: baseTextSize,
-    color: '#1f2933',
-  },
-  emojiEditSaveButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
-  emojiEditSaveIcon: {
+  subtitle: {
     fontSize: 16,
-    color: grayText,
+    color: GRAY_TEXT,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  actions: {
+    gap: 12,
+  },
+  primaryButton: {
+    backgroundColor: DARK_NEUTRAL,
+    borderRadius: 22,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  secondaryButton: {
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: DARK_NEUTRAL,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  secondaryButtonText: {
+    color: DARK_NEUTRAL,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

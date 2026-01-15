@@ -1,4 +1,5 @@
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { GRAY_TEXT } from '../styles/colors';
 
 export type MoodEntry = {
   id: string;
@@ -107,11 +108,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   messageText: {
-    color: '#7a7a7a',
+    color: GRAY_TEXT,
   },
   messageTime: {
     fontSize: 12,
-    color: '#7a7a7a',
+    color: GRAY_TEXT,
   },
   messageActions: {
     flexDirection: 'row',
@@ -131,6 +132,6 @@ const styles = StyleSheet.create({
     marginTop: 48,
   },
   emptyText: {
-    color: '#7a7a7a',
+    color: GRAY_TEXT,
   },
 });
