@@ -2,9 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import pg from 'pg';
-import createUsersRouter from './routes/users.js';
-import createMoodLogsRouter from './routes/moodLogs.js';
-import createMoodEntriesRouter from './routes/moodEntries.js';
+import { createHandler } from 'graphql-http/lib/use/express';
+import { createRootResolvers, schema } from './graphql/schema.js';
 
 dotenv.config();
 
@@ -32,16 +31,7 @@ const ensureTables = async () => {
       id BIGSERIAL PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
       name TEXT,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS mood_logs (
-      id BIGSERIAL PRIMARY KEY,
-      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      title TEXT,
+      password_hash TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
@@ -51,8 +41,8 @@ const ensureTables = async () => {
     CREATE TABLE IF NOT EXISTS mood_entries (
       id BIGSERIAL PRIMARY KEY,
       user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      mood_log_id BIGINT NOT NULL REFERENCES mood_logs(id) ON DELETE CASCADE,
       content TEXT NOT NULL,
+      time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
@@ -79,9 +69,15 @@ app.get('/', (req, res) => {
   res.json({ message: 'Mood Tracker API' });
 });
 
-app.use('/users', createUsersRouter(pool));
-app.use('/mood-logs', createMoodLogsRouter(pool));
-app.use('/mood-entries', createMoodEntriesRouter(pool));
+app.use(
+  '/graphql',
+  createHandler({
+    schema,
+    rootValue: createRootResolvers(pool),
+    graphiql: process.env.NODE_ENV !== 'production',
+  })
+);
+
 
 app.listen(PORT, async () => {
   await ensureTables();
