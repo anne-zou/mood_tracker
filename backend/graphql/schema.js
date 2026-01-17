@@ -1,11 +1,5 @@
 import { buildSchema } from 'graphql';
 import {
-  createUserResolvers,
-  userMutationFields,
-  userQueryFields,
-  userTypeDefs,
-} from './users.js';
-import {
   createMoodEntryResolvers,
   moodEntryMutationFields,
   moodEntryQueryFields,
@@ -13,7 +7,6 @@ import {
 } from './moodEntries.js';
 
 export const schema = buildSchema(`
-  ${userTypeDefs}
   ${moodEntryTypeDefs}
 
   type DeleteResponse {
@@ -22,18 +15,15 @@ export const schema = buildSchema(`
 
   type Query {
     health: String!
-    ${userQueryFields}
     ${moodEntryQueryFields}
   }
 
   type Mutation {
-    ${userMutationFields}
     ${moodEntryMutationFields}
   }
 `);
 
-export const createRootResolvers = (pool) => ({
+export const createRootResolvers = (db) => ({
   health: () => 'ok',
-  ...createUserResolvers(pool),
-  ...createMoodEntryResolvers(pool),
+  ...createMoodEntryResolvers(db),
 });

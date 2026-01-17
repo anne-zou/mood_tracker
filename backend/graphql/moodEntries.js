@@ -1,5 +1,5 @@
-const requirePool = (pool) => {
-  if (!pool) {
+const requireDb = (db) => {
+  if (!db) {
     throw new Error('Database not configured');
   }
 };
@@ -25,8 +25,7 @@ export const moodEntryTypeDefs = `
 `;
 
 export const moodEntryQueryFields = `
-  moodEntries(userId: ID!, startTime: String, endTime: String, limit: Int, offset: Int): [MoodEntry!]!
-  moodEntry(id: ID!): MoodEntry
+  queryMoodEntries(userId: ID!, startTime: String, endTime: String, limit: Int, offset: Int): [MoodEntry!]!
 `;
 
 export const moodEntryMutationFields = `
@@ -35,9 +34,9 @@ export const moodEntryMutationFields = `
   deleteMoodEntry(id: ID!): DeleteResponse!
 `;
 
-export const createMoodEntryResolvers = (pool) => ({
-  moodEntries: async ({ userId, startTime, endTime, limit, offset}) => {
-    requirePool(pool);
+export const createMoodEntryResolvers = (db) => ({
+  queryMoodEntries: async ({ userId, startTime, endTime, limit, offset}) => {
+    requireDb(db);
     if (!userId) {
       throw new Error('userId is required');
     }
@@ -75,30 +74,20 @@ export const createMoodEntryResolvers = (pool) => ({
       params.push(parsedOffset);
     }
 
-    const result = await pool.query(query, params);
+    const result = await db.query(query, params);
     return result.rows.map(mapMoodEntry);
   },
-  moodEntry: async ({ id }) => {
-    requirePool(pool);
-    const result = await pool.query('SELECT * FROM mood_entries WHERE id = $1', [
-      Number(id),
-    ]);
-    if (result.rowCount === 0) {
-      return null;
-    }
-    return mapMoodEntry(result.rows[0]);
-  },
   createMoodEntry: async ({ userId, content, time }) => {
-    requirePool(pool);
-    const result = await pool.query(
+    requireDb(db);
+    const result = await db.query(
       'INSERT INTO mood_entries (user_id, content, time) VALUES ($1, $2, $3) RETURNING *',
       [Number(userId), content, time]
     );
     return mapMoodEntry(result.rows[0]);
   },
   updateMoodEntry: async ({ id, content, time }) => {
-    requirePool(pool);
-    const result = await pool.query(
+    requireDb(db);
+    const result = await db.query(
       `
         UPDATE mood_entries
         SET
@@ -118,8 +107,8 @@ export const createMoodEntryResolvers = (pool) => ({
     return mapMoodEntry(result.rows[0]);
   },
   deleteMoodEntry: async ({ id }) => {
-    requirePool(pool);
-    const result = await pool.query(
+    requireDb(db);
+    const result = await db.query(
       'DELETE FROM mood_entries WHERE id = $1 RETURNING *',
       [Number(id)]
     );

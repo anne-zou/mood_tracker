@@ -13,7 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const DATABASE_URL = process.env.DATABASE_URL;
 
-const pool = DATABASE_URL
+const db = DATABASE_URL
   ? new Pool({
       connectionString: DATABASE_URL,
       ssl:
@@ -24,23 +24,12 @@ const pool = DATABASE_URL
   : null;
 
 const ensureTables = async () => {
-  if (!pool) return;
+  if (!db) return;
 
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id BIGSERIAL PRIMARY KEY,
-      email TEXT UNIQUE NOT NULL,
-      name TEXT,
-      password_hash TEXT,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `);
-
-  await pool.query(`
+  await db.query(`
     CREATE TABLE IF NOT EXISTS mood_entries (
       id BIGSERIAL PRIMARY KEY,
-      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      user_id TEXT NOT NULL,
       content TEXT NOT NULL,
       time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -53,12 +42,12 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/health', async (req, res) => {
-  if (!pool) {
+  if (!db) {
     return res.json({ status: 'ok', db: 'not_configured' });
   }
 
   try {
-    await pool.query('SELECT 1');
+    await db.query('SELECT 1');
     return res.json({ status: 'ok', db: 'connected' });
   } catch (error) {
     return res.status(500).json({ status: 'error', db: 'failed' });
@@ -73,7 +62,7 @@ app.use(
   '/graphql',
   createHandler({
     schema,
-    rootValue: createRootResolvers(pool),
+    rootValue: createRootResolvers(db),
     graphiql: process.env.NODE_ENV !== 'production',
   })
 );
@@ -85,8 +74,8 @@ app.listen(PORT, async () => {
 });
 
 process.on('SIGINT', async () => {
-  if (pool) {
-    await pool.end();
+  if (db) {
+    await db.end();
   }
   process.exit(0);
 });
