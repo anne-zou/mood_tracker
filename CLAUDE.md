@@ -50,12 +50,12 @@ The server auto-creates required database tables on startup via `ensureTables()`
 
 ### Frontend Structure
 - Uses Expo Router for file-based routing in `app/`
-- `app/_layout.tsx` - Root layout with GestureHandler setup
-- `app/index.tsx` - Entry point
+- `app/_layout.tsx` - Root layout with GestureHandler and PaperProvider setup
+- `app/index.tsx` - Auth landing page with Google OAuth
 - `app/home.tsx` - Main mood tracking screen
-- `app/auth/` - Login/signup screens
 - `app/components/` - Reusable components (EmojiRow, MoodInputBar, MoodMessageList)
 - `app/styles/` - Shared styles
+- `lib/supabase.ts` - Supabase client for frontend authentication
 
 ### GraphQL API
 - Endpoint: `http://localhost:4000/graphql`
@@ -64,7 +64,20 @@ The server auto-creates required database tables on startup via `ensureTables()`
 
 ## Environment Variables
 
-Backend requires `backend/.env`:
+### Backend (`backend/.env`)
 - `DATABASE_URL` - PostgreSQL connection string
 - `JWT_SECRET` - Signing key for auth tokens
-- Supabase credentials (see `supabase.js`)
+- `SUPABASE_KEY` - Supabase service role key for server-side auth
+
+### Frontend (`frontend/.env`)
+- `EXPO_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous/public key for client-side auth
+
+Note: Frontend environment variables must be prefixed with `EXPO_PUBLIC_` to be accessible in the app.
+
+## Authentication
+
+The app uses Supabase for authentication with Google OAuth:
+- Frontend initiates OAuth flow via `supabase.auth.signInWithOAuth()`
+- OAuth redirects to `moodlogger://auth/callback`
+- Session state is managed by Supabase auth state listener
+- Backend validates JWT tokens from Supabase
