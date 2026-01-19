@@ -4,11 +4,9 @@ import {
   moodEntryMutationFields,
   moodEntryQueryFields,
   moodEntryTypeDefs,
-} from './moodEntries.js';
-import { createUserResolvers, userMutationFields, userTypeDefs } from './users.js';
+} from './moodEntries/moodEntries.js';
 
 export const schema = buildSchema(`
-  ${userTypeDefs}
   ${moodEntryTypeDefs}
 
   type DeleteResponse {
@@ -21,13 +19,11 @@ export const schema = buildSchema(`
   }
 
   type Mutation {
-    ${userMutationFields}
     ${moodEntryMutationFields}
   }
 `);
 
 export const createRootResolvers = () => ({
   health: () => 'ok',
-  ...createUserResolvers(),
   ...createMoodEntryResolvers(),
 });

@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import pg from 'pg';
 import { createHandler } from 'graphql-http/lib/use/express';
 import { createRootResolvers, schema } from './graphql/schema.js';
-import supabase from './supabase.js';
+import { requireSupabase } from './supabase.js';
 
 dotenv.config();
 
@@ -38,7 +38,7 @@ app.use((req, res, next) => {
 });
 
 /**
- * If user is logged in, set the userId in the request context
+ * If user is logged in, set the userId and accessToken in the request context
  */
 app.use(async (req, res, next) => {
   const authHeader = req.headers.authorization || '';
@@ -46,7 +46,15 @@ app.use(async (req, res, next) => {
 
   if (!token) {
     req.userId = null;
+    req.accessToken = null;
     return next();
+  }
+
+  let supabase;
+  try {
+    supabase = requireSupabase();
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 
   const { data, error } = await supabase.auth.getUser(token);
@@ -55,6 +63,7 @@ app.use(async (req, res, next) => {
   }
 
   req.userId = data.user.id;
+  req.accessToken = token;
   return next();
 });
 
@@ -89,7 +98,7 @@ app.use(
   createHandler({
     schema,
     rootValue: createRootResolvers(),
-    context: (req) => ({ userId: req.userId, db }),
+    context: (req) => ({ userId: req.userId, accessToken: req.accessToken, db }),
     graphiql: process.env.NODE_ENV !== 'production',
   })
 );
