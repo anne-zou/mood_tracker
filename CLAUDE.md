@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Mood Tracker is a lightweight app for logging moods and thoughts in a chat-like interface. It's a monorepo with separate `frontend/` and `backend/` directories.
+Mood Logger is a lightweight app for logging moods and thoughts in a chat-like interface. It's a monorepo with separate `frontend/` and `backend/` directories.
 
 ## Tech Stack
 

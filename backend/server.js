@@ -87,7 +87,7 @@ app.get('/health', async (req, res) => {
  * Root endpoint
  */
 app.get('/', (req, res) => {
-  res.json({ message: 'Mood Tracker API' });
+  res.json({ message: 'Mood Logger API' });
 });
 
 /**
