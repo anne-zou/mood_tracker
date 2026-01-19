@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View, Alert } from 'react-native';
+import { StyleSheet, View, Alert, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { Button, Text } from 'react-native-paper';
 import { useState, useEffect } from 'react';
@@ -35,24 +35,38 @@ export default function AuthLandingScreen() {
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'moodlogger://auth/callback',
-        },
-      });
 
-      if (error) throw error;
+      if (Platform.OS === 'web') {
+        // For web, use direct OAuth with current window redirect
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin,
+          },
+        });
 
-      // Open the OAuth URL in browser
-      if (data?.url) {
-        const result = await WebBrowser.openAuthSessionAsync(
-          data.url,
-          'moodlogger://auth/callback'
-        );
+        if (error) throw error;
+      } else {
+        // For mobile, use expo-web-browser
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: 'moodlogger://auth/callback',
+          },
+        });
 
-        if (result.type === 'success') {
-          // The auth state change listener will handle navigation
+        if (error) throw error;
+
+        // Open the OAuth URL in browser
+        if (data?.url) {
+          const result = await WebBrowser.openAuthSessionAsync(
+            data.url,
+            'moodlogger://auth/callback'
+          );
+
+          if (result.type === 'success') {
+            // The auth state change listener will handle navigation
+          }
         }
       }
     } catch (error: any) {

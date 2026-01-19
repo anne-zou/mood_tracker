@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   KeyboardAvoidingView,
@@ -9,15 +10,18 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Menu, IconButton } from 'react-native-paper';
 import { INPUT_HEIGHT, INPUT_RADIUS } from './styles/inputStyles';
-import { GRAY_TEXT, SCREEN_BACKGROUND } from './styles/colors';
+import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL } from './styles/colors';
 import EmojiRow from './components/EmojiRow';
 import MoodInputBar from './components/MoodInputBar';
 import MoodMessageList, { MoodEntry } from './components/MoodMessageList';
+import { supabase } from '../lib/supabase';
 
 const baseTextSize = 15;
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [entries, setEntries] = useState<MoodEntry[]>([]);
   const [input, setInput] = useState('');
   const [emojis, setEmojis] = useState(['🙂', '😩', '😠', '🥱']);
@@ -25,6 +29,25 @@ export default function HomeScreen() {
   const [emojiInput, setEmojiInput] = useState(emojis.join(' '));
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [editingEntryText, setEditingEntryText] = useState('');
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.replace('/');
+      }
+    });
+
+    // Listen for auth state changes (e.g., sign out)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        router.replace('/');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
 
   const handleSend = () => {
     const trimmed = input.trim();
@@ -83,8 +106,29 @@ export default function HomeScreen() {
     setIsEditingEmojis(false);
   };
 
+  const handleSignOut = async () => {
+    setMenuVisible(false);
+    await supabase.auth.signOut();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Menu
+          visible={menuVisible}
+          onDismiss={() => setMenuVisible(false)}
+          anchor={
+            <IconButton
+              icon="menu"
+              size={24}
+              iconColor={DARK_NEUTRAL}
+              onPress={() => setMenuVisible(true)}
+            />
+          }
+        >
+          <Menu.Item onPress={handleSignOut} title="Sign out" leadingIcon="logout" />
+        </Menu>
+      </View>
       <KeyboardAvoidingView
         style={styles.inner}
         behavior={Platform.select({ ios: 'padding', android: undefined })}
@@ -145,6 +189,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: SCREEN_BACKGROUND,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 8,
+    paddingTop: 8,
   },
   inner: {
     flex: 1,
