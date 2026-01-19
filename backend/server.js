@@ -1,12 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import pg from 'pg';
 import { createHandler } from 'graphql-http/lib/use/express';
 import { createRootResolvers, schema } from './graphql/schema.js';
 import { requireSupabase } from './supabase.js';
-
-dotenv.config();
 
 const { Pool } = pg;
 

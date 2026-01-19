@@ -4,6 +4,8 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider, MD3LightTheme, configureFonts } from 'react-native-paper';
 import { Platform } from 'react-native';
+import { ApolloProvider } from '@apollo/client/react';
+import { apolloClient } from '../lib/apollo';
 import { DARK_NEUTRAL, SCREEN_BACKGROUND, GRAY_TEXT, WHITE } from './styles/colors';
 import { RADIUS } from './styles/textStyles';
 
@@ -52,11 +54,13 @@ const theme = {
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <PaperProvider theme={theme}>
-        <Stack screenOptions={{ headerShown: false }} />
-        <StatusBar style="auto" />
-      </PaperProvider>
-    </GestureHandlerRootView>
+    <ApolloProvider client={apolloClient}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <PaperProvider theme={theme}>
+          <Stack screenOptions={{ headerShown: false }} />
+          <StatusBar style="auto" />
+        </PaperProvider>
+      </GestureHandlerRootView>
+    </ApolloProvider>
   );
 }

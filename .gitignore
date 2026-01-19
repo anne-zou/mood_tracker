@@ -3,3 +3,4 @@ node_modules/
 .DS_Store
 git-filter-repo.py
 .vscode/settings.json
+.npm-cache/

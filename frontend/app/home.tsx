@@ -7,19 +7,28 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Menu, IconButton, TextInput, Text } from 'react-native-paper';
+import { Menu, IconButton, TextInput, Text, ActivityIndicator } from 'react-native-paper';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from './styles/textStyles';
 import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL, WHITE } from './styles/colors';
 import EmojiRow from './components/EmojiRow';
 import MoodInputBar from './components/MoodInputBar';
 import MoodMessageList, { MoodEntry } from './components/MoodMessageList';
 import { supabase } from '../lib/supabase';
+import {
+  QUERY_MOOD_ENTRIES,
+  CREATE_MOOD_ENTRY,
+  UPDATE_MOOD_ENTRY,
+  DELETE_MOOD_ENTRY,
+  MoodEntryResponse,
+  QueryMoodEntriesData,
+} from '../lib/graphql/moodEntries';
 
 const baseTextSize = 15;
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [entries, setEntries] = useState<MoodEntry[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [emojis, setEmojis] = useState(['🙂', '😩', '😠', '🥱']);
   const [isEditingEmojis, setIsEditingEmojis] = useState(false);
@@ -28,11 +37,32 @@ export default function HomeScreen() {
   const [editingEntryText, setEditingEntryText] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
 
+  const { data, loading, error } = useQuery<QueryMoodEntriesData>(QUERY_MOOD_ENTRIES, {
+    variables: { limit: 100 },
+    skip: !userId || typeof window === 'undefined',
+    errorPolicy: 'all',
+    ssr: false,
+  });
+
+  const [createMoodEntry] = useMutation(CREATE_MOOD_ENTRY, {
+    refetchQueries: [{ query: QUERY_MOOD_ENTRIES, variables: { limit: 100 } }],
+  });
+
+  const [updateMoodEntry] = useMutation(UPDATE_MOOD_ENTRY, {
+    refetchQueries: [{ query: QUERY_MOOD_ENTRIES, variables: { limit: 100 } }],
+  });
+
+  const [deleteMoodEntry] = useMutation(DELETE_MOOD_ENTRY, {
+    refetchQueries: [{ query: QUERY_MOOD_ENTRIES, variables: { limit: 100 } }],
+  });
+
   useEffect(() => {
     // Check if user is authenticated
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         router.replace('/');
+      } else {
+        setUserId(session.user.id);
       }
     });
 
@@ -40,20 +70,44 @@ export default function HomeScreen() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         router.replace('/');
+        setUserId(null);
+      } else {
+        setUserId(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [router]);
 
-  const handleSend = () => {
+  const entries: MoodEntry[] = data?.queryMoodEntries?.map((entry: MoodEntryResponse) => ({
+    id: entry.id,
+    text: entry.content,
+    createdAt: new Date(entry.time).getTime(),
+  })) || [];
+
+  useEffect(() => {
+    if (error) {
+      console.error('GraphQL Error:', error);
+    }
+  }, [error]);
+
+  const handleSend = async () => {
     const trimmed = input.trim();
-    if (!trimmed) {
+    if (!trimmed || !userId) {
       return;
     }
-    const now = Date.now();
-    setEntries((prev) => [{ id: `${now}`, text: trimmed, createdAt: now }, ...prev]);
-    setInput('');
+    try {
+      await createMoodEntry({
+        variables: {
+          userId,
+          content: trimmed,
+          time: new Date().toISOString(),
+        },
+      });
+      setInput('');
+    } catch (error) {
+      console.error('Error creating mood entry:', error);
+    }
   };
 
   const handleAddEmoji = (emoji: string) => {
@@ -65,20 +119,33 @@ export default function HomeScreen() {
     setEditingEntryText(entry.text);
   };
 
-  const handleSaveEditEntry = () => {
+  const handleSaveEditEntry = async () => {
     if (!editingEntryId) {
       return;
     }
-    setEntries((prev) =>
-      prev.map((entry) =>
-        entry.id === editingEntryId ? { ...entry, text: editingEntryText.trim() } : entry
-      )
-    );
-    setEditingEntryId(null);
+    try {
+      await updateMoodEntry({
+        variables: {
+          id: editingEntryId,
+          content: editingEntryText.trim(),
+        },
+      });
+      setEditingEntryId(null);
+    } catch (error) {
+      console.error('Error updating mood entry:', error);
+    }
   };
 
-  const handleDeleteEntry = (entryId: string) => {
-    setEntries((prev) => prev.filter((entry) => entry.id !== entryId));
+  const handleDeleteEntry = async (entryId: string) => {
+    try {
+      await deleteMoodEntry({
+        variables: {
+          id: entryId,
+        },
+      });
+    } catch (error) {
+      console.error('Error deleting mood entry:', error);
+    }
   };
 
   const formatEmojiInput = (value: string) => sanitizeEmojis(value).join(' ');
@@ -107,6 +174,16 @@ export default function HomeScreen() {
     setMenuVisible(false);
     await supabase.auth.signOut();
   };
+
+  if (loading && !data) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={DARK_NEUTRAL} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -197,6 +274,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: SCREEN_BACKGROUND,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     flexDirection: 'row',

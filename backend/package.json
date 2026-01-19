@@ -5,7 +5,7 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node --import dotenv/config server.js",
     "test": "node --test --import dotenv/config"
   },
   "keywords": [],
