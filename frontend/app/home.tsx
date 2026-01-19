@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import { Menu, IconButton, TextInput, Text, ActivityIndicator } from 'react-native-paper';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from './styles/textStyles';
-import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL, WHITE } from './styles/colors';
+import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from './_styles/textStyles';
+import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL, WHITE } from './_styles/colors';
 import EmojiRow from './components/EmojiRow';
 import MoodInputBar from './components/MoodInputBar';
 import MoodMessageList, { MoodEntry } from './components/MoodMessageList';
