@@ -95,7 +95,7 @@ app.use(
   createHandler({
     schema,
     rootValue: createRootResolvers(),
-    context: (req) => ({ userId: req.userId, accessToken: req.accessToken, db }),
+    context: (req) => ({ userId: req.raw.userId, accessToken: req.raw.accessToken, db }),
     graphiql: process.env.NODE_ENV !== 'production',
   })
 );

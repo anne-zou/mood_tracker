@@ -27,8 +27,8 @@ export const QUERY_MOOD_ENTRIES = gql`
 `;
 
 export const CREATE_MOOD_ENTRY = gql`
-  mutation CreateMoodEntry($userId: ID!, $content: String!, $time: String!) {
-    createMoodEntry(userId: $userId, content: $content, time: $time) {
+  mutation CreateMoodEntry($content: String!, $time: String!) {
+    createMoodEntry(content: $content, time: $time) {
       id
       userId
       content

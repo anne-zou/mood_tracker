@@ -98,7 +98,6 @@ export default function HomeScreen() {
     try {
       await createMoodEntry({
         variables: {
-          userId,
           content: trimmed,
           time: new Date().toISOString(),
         },

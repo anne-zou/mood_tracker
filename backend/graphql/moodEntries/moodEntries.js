@@ -23,7 +23,7 @@ export const moodEntryQueryFields = `
 `;
 
 export const moodEntryMutationFields = `
-  createMoodEntry(userId: ID!, content: String!, time: String!): MoodEntry!
+  createMoodEntry(content: String!, time: String!): MoodEntry!
   updateMoodEntry(id: ID!, content: String, time: String): MoodEntry!
   deleteMoodEntry(id: ID!): DeleteResponse!
 `;
@@ -35,14 +35,14 @@ export const createMoodEntryResolvers = () => ({
   queryMoodEntries: (args, context) => queryMoodEntries(args, context),
 });
 
-const createMoodEntry = async ({ userId, content, time }, context) => {
+const createMoodEntry = async ({ content, time }, context) => {
   const db = context?.db;
   if (!context?.userId) {
     throw new Error('Authentication required');
   }
   const result = await db.query(
     'INSERT INTO mood_entries (user_id, content, time) VALUES ($1, $2, $3) RETURNING *',
-    [Number(userId), content, time]
+    [context.userId, content, time]
   );
   return mapMoodEntry(result.rows[0]);
 };
@@ -59,14 +59,14 @@ const updateMoodEntry = async ({ id, content, time }, context) => {
         content = COALESCE($1, content),
         time = COALESCE($2, time),
         updated_at = NOW()
-      WHERE id = $3
+      WHERE id = $3 AND user_id = $4
       RETURNING *
     `,
-    [content ?? null, time ?? null, Number(id)]
+    [content ?? null, time ?? null, Number(id), context.userId]
   );
 
   if (result.rowCount === 0) {
-    throw new Error('Mood entry not found');
+    throw new Error('Mood entry not found or access denied');
   }
 
   return mapMoodEntry(result.rows[0]);
@@ -78,12 +78,12 @@ const deleteMoodEntry = async ({ id }, context) => {
     throw new Error('Authentication required');
   }
   const result = await db.query(
-    'DELETE FROM mood_entries WHERE id = $1 RETURNING *',
-    [Number(id)]
+    'DELETE FROM mood_entries WHERE id = $1 AND user_id = $2 RETURNING *',
+    [Number(id), context.userId]
   );
 
   if (result.rowCount === 0) {
-    throw new Error('Mood entry not found');
+    throw new Error('Mood entry not found or access denied');
   }
 
   return { deleted: true };
