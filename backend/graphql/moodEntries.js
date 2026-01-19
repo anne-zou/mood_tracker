@@ -1,9 +1,3 @@
-const requireDb = (db) => {
-  if (!db) {
-    throw new Error('Database not configured');
-  }
-};
-
 const mapMoodEntry = (row) => ({
   id: row.id,
   userId: row.user_id,
@@ -25,7 +19,7 @@ export const moodEntryTypeDefs = `
 `;
 
 export const moodEntryQueryFields = `
-  queryMoodEntries(userId: ID!, startTime: String, endTime: String, limit: Int, offset: Int): [MoodEntry!]!
+  queryMoodEntries(startTime: String, endTime: String, limit: Int, offset: Int): [MoodEntry!]!
 `;
 
 export const moodEntryMutationFields = `
@@ -34,89 +28,106 @@ export const moodEntryMutationFields = `
   deleteMoodEntry(id: ID!): DeleteResponse!
 `;
 
-export const createMoodEntryResolvers = (db) => ({
-  queryMoodEntries: async ({ userId, startTime, endTime, limit, offset}) => {
-    requireDb(db);
-    if (!userId) {
-      throw new Error('userId is required');
-    }
-    if (startTime && endTime) {
-      if (startTime > endTime) {
-        throw new Error('startTime must be before endTime');
-      }
-    }
-    const parsedLimit = Number.isInteger(limit) ? Math.max(0, limit) : null;
-    const parsedOffset = Number.isInteger(offset) ? Math.max(0, offset) : null;
-
-    let query = 'SELECT * FROM mood_entries WHERE user_id = $1';
-    const params = [Number(userId)];
-
-    if (startTime && endTime) {
-      query += ` AND time BETWEEN $${params.length + 1} AND $${params.length + 2}`;
-      params.push(startTime, endTime);
-    } else if (startTime) {
-      query += ` AND time >= $${params.length + 1}`;
-      params.push(startTime);
-    } else if (endTime) {
-      query += ` AND time <= $${params.length + 1}`;
-      params.push(endTime);
-    }
-
-    query += ' ORDER BY time DESC';
-
-    if (parsedLimit !== null) {
-      query += ` LIMIT $${params.length + 1}`;
-      params.push(parsedLimit);
-    }
-
-    if (parsedOffset !== null) {
-      query += ` OFFSET $${params.length + 1}`;
-      params.push(parsedOffset);
-    }
-
-    const result = await db.query(query, params);
-    return result.rows.map(mapMoodEntry);
-  },
-  createMoodEntry: async ({ userId, content, time }) => {
-    requireDb(db);
-    const result = await db.query(
-      'INSERT INTO mood_entries (user_id, content, time) VALUES ($1, $2, $3) RETURNING *',
-      [Number(userId), content, time]
-    );
-    return mapMoodEntry(result.rows[0]);
-  },
-  updateMoodEntry: async ({ id, content, time }) => {
-    requireDb(db);
-    const result = await db.query(
-      `
-        UPDATE mood_entries
-        SET
-          content = COALESCE($1, content),
-          time = COALESCE($2, time),
-          updated_at = NOW()
-        WHERE id = $3
-        RETURNING *
-      `,
-      [content ?? null, time ?? null, Number(id)]
-    );
-
-    if (result.rowCount === 0) {
-      throw new Error('Mood entry not found');
-    }
-
-    return mapMoodEntry(result.rows[0]);
-  },
-  deleteMoodEntry: async ({ id }) => {
-    requireDb(db);
-    const result = await db.query(
-      'DELETE FROM mood_entries WHERE id = $1 RETURNING *',
-      [Number(id)]
-    );
-
-    if (result.rowCount === 0) {
-      throw new Error('Mood entry not found');
-    }
-
-    return { deleted: true };
-  },
+export const createMoodEntryResolvers = () => ({
+  createMoodEntry: (args, context) => createMoodEntry(args, context),
+  updateMoodEntry: (args, context) => updateMoodEntry(args, context),
+  deleteMoodEntry: (args, context) => deleteMoodEntry(args, context),
+  queryMoodEntries: (args, context) => queryMoodEntries(args, context),
 });
+
+const createMoodEntry = async ({ userId, content, time }, context) => {
+  const db = context?.db;
+  if (!context?.userId) {
+    throw new Error('Authentication required');
+  }
+  const result = await db.query(
+    'INSERT INTO mood_entries (user_id, content, time) VALUES ($1, $2, $3) RETURNING *',
+    [Number(userId), content, time]
+  );
+  return mapMoodEntry(result.rows[0]);
+};
+
+const updateMoodEntry = async ({ id, content, time }, context) => {
+  const db = context?.db;
+  if (!context?.userId) {
+    throw new Error('Authentication required');
+  }
+  const result = await db.query(
+    `
+      UPDATE mood_entries
+      SET
+        content = COALESCE($1, content),
+        time = COALESCE($2, time),
+        updated_at = NOW()
+      WHERE id = $3
+      RETURNING *
+    `,
+    [content ?? null, time ?? null, Number(id)]
+  );
+
+  if (result.rowCount === 0) {
+    throw new Error('Mood entry not found');
+  }
+
+  return mapMoodEntry(result.rows[0]);
+};
+
+const deleteMoodEntry = async ({ id }, context) => {
+  const db = context?.db;
+  if (!context?.userId) {
+    throw new Error('Authentication required');
+  }
+  const result = await db.query(
+    'DELETE FROM mood_entries WHERE id = $1 RETURNING *',
+    [Number(id)]
+  );
+
+  if (result.rowCount === 0) {
+    throw new Error('Mood entry not found');
+  }
+
+  return { deleted: true };
+};
+
+const queryMoodEntries = async ({ startTime, endTime, limit, offset }, context) => {
+  const db = context?.db;
+  if (!context?.userId) {
+    throw new Error('Authentication required');
+  }
+  if (startTime && endTime) {
+    if (startTime > endTime) {
+      throw new Error('startTime must be before endTime');
+    }
+  }
+  const parsedLimit = Number.isInteger(limit) ? Math.max(0, limit) : null;
+  const parsedOffset = Number.isInteger(offset) ? Math.max(0, offset) : null;
+
+  let query = 'SELECT * FROM mood_entries WHERE user_id = $1';
+  const params = [context.userId];
+
+  if (startTime && endTime) {
+    query += ` AND time BETWEEN $${params.length + 1} AND $${params.length + 2}`;
+    params.push(startTime, endTime);
+  } else if (startTime) {
+    query += ` AND time >= $${params.length + 1}`;
+    params.push(startTime);
+  } else if (endTime) {
+    query += ` AND time <= $${params.length + 1}`;
+    params.push(endTime);
+  }
+
+  query += ' ORDER BY time DESC';
+
+  if (parsedLimit !== null) {
+    query += ` LIMIT $${params.length + 1}`;
+    params.push(parsedLimit);
+  }
+
+  if (parsedOffset !== null) {
+    query += ` OFFSET $${params.length + 1}`;
+    params.push(parsedOffset);
+  }
+
+  const result = await db.query(query, params);
+  return result.rows.map(mapMoodEntry);
+};
