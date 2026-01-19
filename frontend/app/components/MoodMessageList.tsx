@@ -2,6 +2,7 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { Surface, IconButton, Text, TextInput } from 'react-native-paper';
 import { GRAY_TEXT, WHITE } from '../../styles/colors';
 import { RADIUS } from '../../styles/textStyles';
+import { fontConfig } from '../_layout';
 
 export type MoodEntry = {
   id: string;
@@ -61,6 +62,7 @@ export default function MoodMessageList({
                 colors: { outline: 'transparent', background: WHITE }
               }}
               contentStyle={{
+                ...fontConfig,
                 fontSize: textSize,
                 color: textColor,
                 paddingHorizontal: 14,
@@ -69,7 +71,7 @@ export default function MoodMessageList({
             />
           ) : (
               <Surface style={styles.messageBubble} elevation={0}>
-              <Text style={[styles.messageText, { color: textColor, fontSize: textSize }]}>
+              <Text style={[styles.messageText, { ...fontConfig, color: textColor, fontSize: textSize }]}>
                   {item.content}
               </Text>
               </Surface>
@@ -131,7 +133,8 @@ const styles = StyleSheet.create({
   },
   editingInput: {
     maxWidth: '80%',
-    height: 38
+    minWidth: '80%',
+    height: 38,
   },
   messageText: {
     color: GRAY_TEXT,

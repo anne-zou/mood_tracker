@@ -9,12 +9,13 @@ import { apolloClient } from '../lib/apollo';
 import { DARK_NEUTRAL, SCREEN_BACKGROUND, GRAY_TEXT, WHITE } from '../styles/colors';
 import { RADIUS } from '../styles/textStyles';
 
-const fontConfig = {
+export const fontConfig = {
   fontFamily: Platform.select({
     ios: 'System',
     android: 'Roboto',
     default: 'System',
   }),
+  letterSpacing: 0,
 };
 
 const fonts = configureFonts({
