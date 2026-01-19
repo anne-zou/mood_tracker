@@ -6,8 +6,8 @@ import { PaperProvider, MD3LightTheme, configureFonts } from 'react-native-paper
 import { Platform } from 'react-native';
 import { ApolloProvider } from '@apollo/client/react';
 import { apolloClient } from '../lib/apollo';
-import { DARK_NEUTRAL, SCREEN_BACKGROUND, GRAY_TEXT, WHITE } from './_styles/colors';
-import { RADIUS } from './_styles/textStyles';
+import { DARK_NEUTRAL, SCREEN_BACKGROUND, GRAY_TEXT, WHITE } from '../styles/colors';
+import { RADIUS } from '../styles/textStyles';
 
 const fontConfig = {
   fontFamily: Platform.select({

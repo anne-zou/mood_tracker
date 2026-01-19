@@ -6,7 +6,7 @@ import { Button, Text } from 'react-native-paper';
 import { useState, useEffect } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import { supabase } from '../lib/supabase';
-import { SCREEN_BACKGROUND } from './_styles/colors';
+import { SCREEN_BACKGROUND } from '../styles/colors';
 
 WebBrowser.maybeCompleteAuthSession();
 

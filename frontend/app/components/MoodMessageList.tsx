@@ -1,7 +1,7 @@
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Surface, IconButton, Text, TextInput } from 'react-native-paper';
-import { GRAY_TEXT, WHITE } from '../_styles/colors';
-import { RADIUS } from '../_styles/textStyles';
+import { GRAY_TEXT, WHITE } from '../../styles/colors';
+import { RADIUS } from '../../styles/textStyles';
 
 export type MoodEntry = {
   id: string;

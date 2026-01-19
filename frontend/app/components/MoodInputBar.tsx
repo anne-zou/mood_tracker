@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
-import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../_styles/textStyles';
+import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../../styles/textStyles';
 
 type MoodInputBarProps = {
   value: string;

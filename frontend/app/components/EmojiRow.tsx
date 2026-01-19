@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
-import { WHITE } from '../_styles/colors';
-import { RADIUS } from '../_styles/textStyles';
+import { WHITE } from '../../styles/colors';
+import { RADIUS } from '../../styles/textStyles';
 
 type EmojiRowProps = {
   emojis: string[];
