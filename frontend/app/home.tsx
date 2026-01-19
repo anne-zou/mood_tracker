@@ -47,17 +47,20 @@ export default function HomeScreen() {
   });
 
   const [createMoodEntry] = useMutation<CreateMoodEntryResponse>(CREATE_MOOD_ENTRY, {
-    optimisticResponse: (vars) => ({
-      createMoodEntry: {
-        __typename: 'MoodEntry',
-        id: `temp-${Date.now()}`,
-        userId: userId || '',
-        content: vars.content,
-        time: vars.time,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    }),
+    optimisticResponse: (vars) => {
+      const now = Date.now().toString();
+      return {
+        createMoodEntry: {
+          __typename: 'MoodEntry',
+          id: `temp-${now}`,
+          userId: userId || '',
+          content: vars.content,
+          time: now,
+          createdAt: now,
+          updatedAt: now,
+        },
+      };
+    },
     update(cache, { data }) {
       const newEntry = data?.createMoodEntry;
       if (!newEntry) return;
@@ -80,17 +83,20 @@ export default function HomeScreen() {
   });
 
   const [updateMoodEntry] = useMutation<UpdateMoodEntryResponse>(UPDATE_MOOD_ENTRY, {
-    optimisticResponse: (vars) => ({
-      updateMoodEntry: {
-        __typename: 'MoodEntry',
-        id: vars.id,
-        userId: userId || '',
-        content: vars.content || '',
-        time: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    }),
+    optimisticResponse: (vars) => {
+      const entry = entries.find(e => e.id === vars.id);
+      return {
+        updateMoodEntry: {
+          __typename: 'MoodEntry',
+          id: vars.id,
+          userId: userId || '',
+          content: vars.content || '',
+          time: entry?.time.toString() || new Date().toISOString(),
+          createdAt: entry?.createdAt.toString() || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      };
+    },
   });
 
   const [deleteMoodEntry] = useMutation<DeleteMoodEntryResponse>(DELETE_MOOD_ENTRY, {
@@ -162,6 +168,7 @@ export default function HomeScreen() {
 
   const handleSend = async () => {
     const trimmed = input.trim();
+    setInput('');
     if (!trimmed || !userId) {
       return;
     }
@@ -172,7 +179,6 @@ export default function HomeScreen() {
           time: new Date().toISOString(),
         },
       });
-      setInput('');
     } catch (error) {
       console.error('Error creating mood entry:', error);
     }
@@ -191,11 +197,21 @@ export default function HomeScreen() {
     if (!editingEntryId) {
       return;
     }
+
+    const originalEntry = entries.find(e => e.id === editingEntryId);
+    const trimmedText = editingEntryText.trim();
+
+    // Don't save if content hasn't changed
+    if (originalEntry && trimmedText === originalEntry.content) {
+      setEditingEntryId(null);
+      return;
+    }
+
     try {
       await updateMoodEntry({
         variables: {
           id: editingEntryId,
-          content: editingEntryText.trim(),
+          content: trimmedText,
         },
       });
       setEditingEntryId(null);
