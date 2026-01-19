@@ -16,7 +16,7 @@ Mood Tracker is a lightweight app for logging moods and thoughts in a chat-like 
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run start
 ```
 
 ### Backend

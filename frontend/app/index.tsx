@@ -1,25 +1,40 @@
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { DARK_NEUTRAL, GRAY_TEXT, SCREEN_BACKGROUND } from './styles/colors';
+import { StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Button, Text } from 'react-native-paper';
+import { SCREEN_BACKGROUND } from './styles/colors';
 
 export default function AuthLandingScreen() {
+  const router = useRouter();
+
+  const handleGoogleSignIn = () => {
+    // TODO: Implement Google SSO
+    router.replace('/home');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.inner}>
-        <Text style={styles.title}>Mood Logger</Text>
-        <Text style={styles.subtitle}>Log in or create an account to get started.</Text>
+        <Image
+          source={require('../assets/logo_vector.png')}
+          style={styles.logo}
+          contentFit="contain"
+        />
+        <View style={styles.textContainer}>
+          <Text variant="titleLarge" style={styles.title}>
+            Welcome to Mood Logger!
+          </Text>
+        </View>
         <View style={styles.actions}>
-          <Link href="/auth/login" asChild>
-            <Pressable style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>Log in</Text>
-            </Pressable>
-          </Link>
-          <Link href="/auth/signup" asChild>
-            <Pressable style={styles.secondaryButton}>
-              <Text style={styles.secondaryButtonText}>Create account</Text>
-            </Pressable>
-          </Link>
+          <Button
+            mode="contained"
+            onPress={handleGoogleSignIn}
+            icon="google"
+            style={styles.googleButton}
+          >
+            Sign in with Google
+          </Button>
         </View>
       </View>
     </SafeAreaView>
@@ -36,43 +51,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     justifyContent: 'center',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '600',
-    color: GRAY_TEXT,
-    marginBottom: 24,
-    textAlign: 'center',
+  logo: {
+    height: 180,
+    width: 180,
+    alignSelf: 'center',
+    marginBottom: 32,
   },
-  subtitle: {
-    fontSize: 16,
-    color: GRAY_TEXT,
+  textContainer: {
     marginBottom: 24,
+  },
+  title: {
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  body: {
     textAlign: 'center',
   },
   actions: {
+    flexDirection: 'column',
     gap: 12,
   },
-  primaryButton: {
-    backgroundColor: DARK_NEUTRAL,
-    borderRadius: 22,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: DARK_NEUTRAL,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  secondaryButtonText: {
-    color: DARK_NEUTRAL,
-    fontSize: 16,
-    fontWeight: '600',
+  googleButton: {
+    width: '100%',
   },
 });
