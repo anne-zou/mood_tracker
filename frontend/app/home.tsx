@@ -41,7 +41,6 @@ export default function HomeScreen() {
     variables: { limit: 100 },
     skip: !userId || typeof window === 'undefined',
     errorPolicy: 'all',
-    ssr: false,
   });
 
   const [createMoodEntry] = useMutation(CREATE_MOOD_ENTRY, {
