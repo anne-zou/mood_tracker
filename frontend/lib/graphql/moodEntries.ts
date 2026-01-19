@@ -9,8 +9,22 @@ export interface MoodEntryResponse {
   updatedAt: string;
 }
 
-export interface QueryMoodEntriesData {
+export interface QueryMoodEntriesResponse {
   queryMoodEntries: MoodEntryResponse[];
+}
+
+export interface CreateMoodEntryResponse {
+  createMoodEntry: MoodEntryResponse;
+}
+
+export interface UpdateMoodEntryResponse {
+  updateMoodEntry: MoodEntryResponse;
+}
+
+export interface DeleteMoodEntryResponse {
+  deleteMoodEntry: {
+    deleted: boolean;
+  };
 }
 
 export const QUERY_MOOD_ENTRIES = gql`

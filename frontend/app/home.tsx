@@ -21,7 +21,10 @@ import {
   UPDATE_MOOD_ENTRY,
   DELETE_MOOD_ENTRY,
   MoodEntryResponse,
-  QueryMoodEntriesData,
+  QueryMoodEntriesResponse,
+  CreateMoodEntryResponse,
+  UpdateMoodEntryResponse,
+  DeleteMoodEntryResponse,
 } from '../lib/graphql/moodEntries';
 
 const baseTextSize = 15;
@@ -37,22 +40,86 @@ export default function HomeScreen() {
   const [editingEntryText, setEditingEntryText] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
 
-  const { data, loading, error, refetch } = useQuery<QueryMoodEntriesData>(QUERY_MOOD_ENTRIES, {
+  const { data, loading, error } = useQuery<QueryMoodEntriesResponse>(QUERY_MOOD_ENTRIES, {
     variables: { limit: 100 },
     skip: !userId || typeof window === 'undefined',
     errorPolicy: 'all',
   });
 
-  const [createMoodEntry] = useMutation(CREATE_MOOD_ENTRY, {
-    onCompleted: () => refetch(),
+  const [createMoodEntry] = useMutation<CreateMoodEntryResponse>(CREATE_MOOD_ENTRY, {
+    optimisticResponse: (vars) => ({
+      createMoodEntry: {
+        __typename: 'MoodEntry',
+        id: `temp-${Date.now()}`,
+        userId: userId || '',
+        content: vars.content,
+        time: vars.time,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    }),
+    update(cache, { data }) {
+      const newEntry = data?.createMoodEntry;
+      if (!newEntry) return;
+
+      const existing = cache.readQuery<QueryMoodEntriesResponse>({
+        query: QUERY_MOOD_ENTRIES,
+        variables: { limit: 100 },
+      });
+
+      if (existing?.queryMoodEntries) {
+        cache.writeQuery({
+          query: QUERY_MOOD_ENTRIES,
+          variables: { limit: 100 },
+          data: {
+            queryMoodEntries: [newEntry, ...existing.queryMoodEntries],
+          },
+        });
+      }
+    },
   });
 
-  const [updateMoodEntry] = useMutation(UPDATE_MOOD_ENTRY, {
-    onCompleted: () => refetch(),
+  const [updateMoodEntry] = useMutation<UpdateMoodEntryResponse>(UPDATE_MOOD_ENTRY, {
+    optimisticResponse: (vars) => ({
+      updateMoodEntry: {
+        __typename: 'MoodEntry',
+        id: vars.id,
+        userId: userId || '',
+        content: vars.content || '',
+        time: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    }),
   });
 
-  const [deleteMoodEntry] = useMutation(DELETE_MOOD_ENTRY, {
-    onCompleted: () => refetch(),
+  const [deleteMoodEntry] = useMutation<DeleteMoodEntryResponse>(DELETE_MOOD_ENTRY, {
+    optimisticResponse: (vars) => ({
+      deleteMoodEntry: {
+        __typename: 'DeleteResponse',
+        deleted: true,
+      },
+    }),
+    update(cache, { data }, { variables }) {
+      if (!data?.deleteMoodEntry?.deleted || !variables?.id) return;
+
+      const existing = cache.readQuery<QueryMoodEntriesResponse>({
+        query: QUERY_MOOD_ENTRIES,
+        variables: { limit: 100 },
+      });
+
+      if (existing?.queryMoodEntries) {
+        cache.writeQuery({
+          query: QUERY_MOOD_ENTRIES,
+          variables: { limit: 100 },
+          data: {
+            queryMoodEntries: existing.queryMoodEntries.filter(
+              (entry) => entry.id !== variables.id
+            ),
+          },
+        });
+      }
+    },
   });
 
   useEffect(() => {
