@@ -5,8 +5,11 @@ import { RADIUS } from '../styles/textStyles';
 
 export type MoodEntry = {
   id: string;
-  text: string;
+  userId: string;
+  content: string;
+  time: number;
   createdAt: number;
+  updatedAt: number;
 };
 
 type MoodMessageListProps = {
@@ -67,12 +70,12 @@ export default function MoodMessageList({
           ) : (
               <Surface style={styles.messageBubble} elevation={0}>
               <Text style={[styles.messageText, { color: textColor, fontSize: textSize }]}>
-                {item.text}
+                  {item.content}
               </Text>
               </Surface>
           )}
           <Text variant="bodySmall" style={[styles.messageTime, { color: textColor }]}>
-            {new Date(item.createdAt).toLocaleTimeString([], {
+            {new Date(item.time).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
               second: '2-digit',

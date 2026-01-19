@@ -37,22 +37,22 @@ export default function HomeScreen() {
   const [editingEntryText, setEditingEntryText] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
 
-  const { data, loading, error } = useQuery<QueryMoodEntriesData>(QUERY_MOOD_ENTRIES, {
+  const { data, loading, error, refetch } = useQuery<QueryMoodEntriesData>(QUERY_MOOD_ENTRIES, {
     variables: { limit: 100 },
     skip: !userId || typeof window === 'undefined',
     errorPolicy: 'all',
   });
 
   const [createMoodEntry] = useMutation(CREATE_MOOD_ENTRY, {
-    refetchQueries: [{ query: QUERY_MOOD_ENTRIES, variables: { limit: 100 } }],
+    onCompleted: () => refetch(),
   });
 
   const [updateMoodEntry] = useMutation(UPDATE_MOOD_ENTRY, {
-    refetchQueries: [{ query: QUERY_MOOD_ENTRIES, variables: { limit: 100 } }],
+    onCompleted: () => refetch(),
   });
 
   const [deleteMoodEntry] = useMutation(DELETE_MOOD_ENTRY, {
-    refetchQueries: [{ query: QUERY_MOOD_ENTRIES, variables: { limit: 100 } }],
+    onCompleted: () => refetch(),
   });
 
   useEffect(() => {
@@ -79,10 +79,15 @@ export default function HomeScreen() {
   }, [router]);
 
   const entries: MoodEntry[] = data?.queryMoodEntries?.map((entry: MoodEntryResponse) => ({
+    userId: entry.userId,
     id: entry.id,
-    text: entry.content,
-    createdAt: new Date(entry.time).getTime(),
+    content: entry.content,
+    time: Number(entry.time),
+    createdAt: Number(entry.createdAt),
+    updatedAt: Number(entry.updatedAt),
   })) || [];
+
+  console.log('entries', entries);
 
   useEffect(() => {
     if (error) {
@@ -114,7 +119,7 @@ export default function HomeScreen() {
 
   const handleStartEditEntry = (entry: MoodEntry) => {
     setEditingEntryId(entry.id);
-    setEditingEntryText(entry.text);
+    setEditingEntryText(entry.content);
   };
 
   const handleSaveEditEntry = async () => {
