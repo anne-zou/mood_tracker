@@ -2,13 +2,14 @@
 
 Mood Tracker is a lightweight app for logging moods and thoughts in a chat-like interface.
 
-## Tech Stack
+## Stack
 
 - Frontend: React Native + Expo
 - Backend: Node.js + Express + GraphQL
 - Database: PostgreSQL
+- Auth: Supabase
 
-## Getting Started
+## Scripts
 
 ### Frontend
 
