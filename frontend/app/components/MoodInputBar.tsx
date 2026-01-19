@@ -1,5 +1,6 @@
-import { StyleSheet, TextInput, View } from 'react-native';
-import { INPUT_HEIGHT, INPUT_RADIUS } from '../styles/inputStyles';
+import { StyleSheet, View } from 'react-native';
+import { TextInput } from 'react-native-paper';
+import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../styles/textStyles';
 
 type MoodInputBarProps = {
   value: string;
@@ -32,16 +33,22 @@ export default function MoodInputBar({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={placeholderTextColor}
-        style={[
-          styles.input,
-          {
-            fontSize: textSize,
-            backgroundColor: inputBackgroundColor,
-            color: inputTextColor,
-          },
-        ]}
+        mode="outlined"
+        dense
         returnKeyType="send"
         onSubmitEditing={onSubmit}
+        style={styles.input}
+        outlineStyle={{ borderWidth: 0 }}
+        theme={{
+          roundness: RADIUS,
+          colors: { outline: 'transparent', background: inputBackgroundColor }
+        }}
+        contentStyle={{
+          fontSize: textSize,
+          color: inputTextColor,
+          paddingHorizontal: 16,
+          paddingVertical: 10,
+        }}
       />
     </View>
   );
@@ -57,10 +64,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    borderRadius: INPUT_RADIUS,
-    height: INPUT_HEIGHT,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    textAlignVertical: 'top',
+    height: MOOD_INPUT_BAR_HEIGHT,
   },
 });

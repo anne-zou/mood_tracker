@@ -1,5 +1,7 @@
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { GRAY_TEXT } from '../styles/colors';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Surface, IconButton, Text, TextInput } from 'react-native-paper';
+import { GRAY_TEXT, WHITE } from '../styles/colors';
+import { RADIUS } from '../styles/textStyles';
 
 export type MoodEntry = {
   id: string;
@@ -44,23 +46,32 @@ export default function MoodMessageList({
             <TextInput
               value={editingText}
               onChangeText={onChangeEditingText}
-              style={[
-                styles.messageBubble,
-                { color: textColor, fontSize: textSize },
-              ]}
+              mode="outlined"
+              dense
               autoFocus
               returnKeyType="done"
               onSubmitEditing={onSaveEdit}
               onBlur={onSaveEdit}
+              style={styles.editingInput}
+              outlineStyle={{ borderWidth: 0 }}
+              theme={{
+                colors: { outline: 'transparent', background: WHITE }
+              }}
+              contentStyle={{
+                fontSize: textSize,
+                color: textColor,
+                paddingHorizontal: 14,
+                paddingVertical: 10,
+              }}
             />
           ) : (
-            <View style={styles.messageBubble}>
+              <Surface style={styles.messageBubble} elevation={0}>
               <Text style={[styles.messageText, { color: textColor, fontSize: textSize }]}>
                 {item.text}
               </Text>
-            </View>
+              </Surface>
           )}
-          <Text style={[styles.messageTime, { color: textColor }]}>
+          <Text variant="bodySmall" style={[styles.messageTime, { color: textColor }]}>
             {new Date(item.createdAt).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
@@ -68,12 +79,20 @@ export default function MoodMessageList({
             })}
           </Text>
           <View style={styles.messageActions}>
-            <Pressable onPress={() => onStartEdit(item)} style={styles.actionButton}>
-              <Text style={[styles.actionIcon, { color: textColor }]}>✎</Text>
-            </Pressable>
-            <Pressable onPress={() => onDelete(item.id)} style={styles.actionButton}>
-              <Text style={[styles.actionIcon, { color: textColor }]}>✕</Text>
-            </Pressable>
+            <IconButton
+              icon="pencil"
+              size={12}
+              iconColor={textColor}
+              onPress={() => onStartEdit(item)}
+              style={styles.actionButton}
+            />
+            <IconButton
+              icon="trash-can"
+              size={12}
+              iconColor={textColor}
+              onPress={() => onDelete(item.id)}
+              style={styles.actionButton}
+            />
           </View>
         </View>
       )}
@@ -102,16 +121,19 @@ const styles = StyleSheet.create({
   },
   messageBubble: {
     maxWidth: '80%',
-    backgroundColor: '#ffffff',
-    borderRadius: 18,
+    backgroundColor: WHITE,
+    borderRadius: RADIUS,
     paddingHorizontal: 14,
     paddingVertical: 10,
+  },
+  editingInput: {
+    maxWidth: '80%',
+    height: 38
   },
   messageText: {
     color: GRAY_TEXT,
   },
   messageTime: {
-    fontSize: 12,
     color: GRAY_TEXT,
   },
   messageActions: {
@@ -120,12 +142,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionButton: {
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-  },
-  actionIcon: {
-    fontSize: 12,
+    margin: 0,
+    width: 28,
+    height: 28,
   },
   emptyState: {
     alignItems: 'center',

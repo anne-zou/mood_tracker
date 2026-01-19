@@ -4,15 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
-import { Menu, IconButton } from 'react-native-paper';
-import { INPUT_HEIGHT, INPUT_RADIUS } from './styles/inputStyles';
-import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL } from './styles/colors';
+import { Menu, IconButton, TextInput, Text } from 'react-native-paper';
+import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from './styles/textStyles';
+import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL, WHITE } from './styles/colors';
 import EmojiRow from './components/EmojiRow';
 import MoodInputBar from './components/MoodInputBar';
 import MoodMessageList, { MoodEntry } from './components/MoodMessageList';
@@ -154,29 +151,40 @@ export default function HomeScreen() {
           placeholderTextColor={GRAY_TEXT}
           textSize={baseTextSize}
           backgroundColor={SCREEN_BACKGROUND}
-          inputBackgroundColor="#ffffff"
+          inputBackgroundColor={WHITE}
           inputTextColor="#1f2933"
         />
         {isEditingEmojis ? (
           <View style={styles.emojiEditRow}>
-            <Text style={styles.emojiEditLabel}>Edit emojis:</Text>
+            <Text variant="bodyMedium" style={styles.emojiEditLabel}>Edit emojis:</Text>
             <TextInput
               value={emojiInput}
               onChangeText={handleEmojiInputChange}
-              style={styles.emojiEditInput}
+              mode="outlined"
+              dense
               returnKeyType="done"
               onSubmitEditing={handleSaveEmojis}
+              style={styles.emojiEditInput}
+              outlineStyle={{ borderWidth: 0 }}
+              theme={{
+                roundness: RADIUS,
+                colors: { outline: 'transparent', background: WHITE }
+              }}
+              contentStyle={{ fontSize: baseTextSize, color: '#1f2933' }}
             />
-            <Pressable style={styles.emojiEditSaveButton} onPress={handleSaveEmojis}>
-              <Text style={styles.emojiEditSaveIcon}>✓</Text>
-            </Pressable>
+            <IconButton
+              icon="check"
+              size={16}
+              iconColor={GRAY_TEXT}
+              onPress={handleSaveEmojis}
+              style={styles.emojiEditSaveButton}
+            />
           </View>
         ) : (
           <EmojiRow
             emojis={emojis}
             onEmojiPress={handleAddEmoji}
-            onActionPress={handleEditEmojis}
-            actionIcon="✎"
+              onActionPress={handleEditEmojis}
             actionIconColor={GRAY_TEXT}
           />
         )}
@@ -207,25 +215,15 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   emojiEditLabel: {
-    fontSize: baseTextSize,
     color: GRAY_TEXT,
     paddingLeft: 12,
   },
   emojiEditInput: {
-    flex: 1,
-    height: INPUT_HEIGHT,
-    borderRadius: INPUT_RADIUS,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 12,
-    fontSize: baseTextSize,
-    color: '#1f2933',
+    height: MOOD_INPUT_BAR_HEIGHT,
   },
   emojiEditSaveButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
-  emojiEditSaveIcon: {
-    fontSize: 16,
-    color: GRAY_TEXT,
+    margin: 0,
+    width: 28,
+    height: 28,
   },
 });

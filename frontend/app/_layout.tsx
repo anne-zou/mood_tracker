@@ -4,7 +4,8 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider, MD3LightTheme, configureFonts } from 'react-native-paper';
 import { Platform } from 'react-native';
-import { DARK_NEUTRAL, SCREEN_BACKGROUND } from './styles/colors';
+import { DARK_NEUTRAL, SCREEN_BACKGROUND, GRAY_TEXT, WHITE } from './styles/colors';
+import { RADIUS } from './styles/textStyles';
 
 const fontConfig = {
   fontFamily: Platform.select({
@@ -37,13 +38,15 @@ const fonts = configureFonts({
 const theme = {
   ...MD3LightTheme,
   fonts,
+  roundness: RADIUS,
   colors: {
     ...MD3LightTheme.colors,
     primary: DARK_NEUTRAL,
     background: SCREEN_BACKGROUND,
+    surface: WHITE,
     onSurface: DARK_NEUTRAL,
     onBackground: DARK_NEUTRAL,
-    onSurfaceVariant: DARK_NEUTRAL,
+    onSurfaceVariant: GRAY_TEXT,
   },
 };
 
