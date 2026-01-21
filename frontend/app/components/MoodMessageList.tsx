@@ -1,5 +1,5 @@
-import { FlatList, StyleSheet, View } from 'react-native';
-import { Surface, IconButton, Text, TextInput } from 'react-native-paper';
+import { FlatList, StyleSheet, View, TextInput as RNTextInput } from 'react-native';
+import { Surface, IconButton, Text } from 'react-native-paper';
 import { GRAY_TEXT, WHITE } from '../../styles/colors';
 import { RADIUS } from '../../styles/textStyles';
 import { fontConfig } from '../_layout';
@@ -46,36 +46,34 @@ export default function MoodMessageList({
       inverted
       renderItem={({ item }) => (
         <View style={styles.messageRow}>
-          {editingId === item.id ? (
-            <TextInput
-              value={editingText}
-              onChangeText={onChangeEditingText}
-              mode="outlined"
-              dense
-              autoFocus
-              returnKeyType="done"
-              onSubmitEditing={onSaveEdit}
-              onBlur={onSaveEdit}
-              style={styles.editingInput}
-              outlineStyle={{ borderWidth: 0 }}
-              theme={{
-                colors: { outline: 'transparent', background: WHITE }
-              }}
-              contentStyle={{
-                ...fontConfig,
-                fontSize: textSize,
-                color: textColor,
-                paddingHorizontal: 14,
-                paddingVertical: 10,
-              }}
-            />
-          ) : (
-              <Surface style={styles.messageBubble} elevation={0}>
+          <View style={styles.messageBubbleWrapper}>
+            <Surface style={styles.messageBubble} elevation={0}>
               <Text style={[styles.messageText, { ...fontConfig, color: textColor, fontSize: textSize }]}>
-                  {item.content}
+                {editingId === item.id ? editingText : item.content}
               </Text>
-              </Surface>
-          )}
+            </Surface>
+            {editingId === item.id && (
+              <RNTextInput
+                value={editingText}
+                onChangeText={onChangeEditingText}
+                autoFocus
+                selection={{ start: editingText.length, end: editingText.length }}
+                returnKeyType="done"
+                onSubmitEditing={onSaveEdit}
+                onBlur={onSaveEdit}
+                multiline
+                scrollEnabled={false}
+                style={[
+                  styles.editingInput,
+                  {
+                    ...fontConfig,
+                    fontSize: textSize,
+                    color: textColor,
+                  },
+                ]}
+              />
+            )}
+          </View>
           <Text variant="bodySmall" style={[styles.messageTime, { color: textColor }]}>
             {new Date(item.time).toLocaleTimeString([], {
               hour: '2-digit',
@@ -124,17 +122,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
-  messageBubble: {
+  messageBubbleWrapper: {
+    position: 'relative',
     maxWidth: '80%',
+  },
+  messageBubble: {
     backgroundColor: WHITE,
     borderRadius: RADIUS,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
   editingInput: {
-    maxWidth: '80%',
-    minWidth: '80%',
-    height: 38,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: WHITE,
+    borderRadius: RADIUS,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
   messageText: {
     color: GRAY_TEXT,
