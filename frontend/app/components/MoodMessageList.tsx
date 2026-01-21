@@ -74,30 +74,35 @@ export default function MoodMessageList({
               />
             )}
           </View>
-          <Text variant="bodySmall" style={[styles.messageTime, { color: textColor }]}>
-            {new Date(item.time).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-            })}
-          </Text>
-          <View style={styles.messageActions}>
-            <IconButton
-              icon="pencil"
-              size={12}
-              iconColor={textColor}
-              onPress={() => onStartEdit(item)}
-              style={styles.actionButton}
-            />
-            <IconButton
-              icon="trash-can"
-              size={12}
-              iconColor={textColor}
-              onPress={() => onDelete(item.id)}
-              style={styles.actionButton}
-            />
-          </View>
-        </View>
+          <View style={styles.messageMetadata}>
+            <Text
+              variant="bodySmall"
+              numberOfLines={1}
+              ellipsizeMode="clip"
+              style={[styles.messageTime, { color: textColor }]}
+            >
+              {new Date(item.time).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </Text>
+            <View style={styles.messageActions}>
+              <IconButton
+                icon="pencil"
+                size={12}
+                iconColor={textColor}
+                onPress={() => onStartEdit(item)}
+                style={styles.actionButton}
+              />
+              <IconButton
+                icon="trash-can"
+                size={12}
+                iconColor={textColor}
+                onPress={() => onDelete(item.id)}
+                style={styles.actionButton}
+              />
+            </View>
+          </View></View>
       )}
       ListEmptyComponent={
         <View style={styles.emptyState}>
@@ -115,21 +120,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 8,
+    width: '100%',
   },
   messageRow: {
     marginBottom: 12,
     alignItems: 'center',
     flexDirection: 'row',
     gap: 8,
+    width: '100%',
   },
   messageBubbleWrapper: {
     position: 'relative',
-    maxWidth: '80%',
+    flexShrink: 1,
   },
   messageBubble: {
     backgroundColor: WHITE,
     borderRadius: RADIUS,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 10,
   },
   editingInput: {
@@ -148,6 +155,11 @@ const styles = StyleSheet.create({
   },
   messageTime: {
     color: GRAY_TEXT,
+    marginRight: 8,
+  },
+  messageMetadata: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   messageActions: {
     flexDirection: 'row',
