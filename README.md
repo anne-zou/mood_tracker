@@ -1,6 +1,6 @@
 # Mood Logger
 
-Mood Logger is a lightweight app for logging moods and thoughts in a chat-like interface.
+Mood Logger is a lightweight app for logging moods and events throughout the day in a chat-like interface.
 
 ## Stack
 
