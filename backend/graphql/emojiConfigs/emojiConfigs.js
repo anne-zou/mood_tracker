@@ -1,3 +1,5 @@
+import emojiRegex from 'emoji-regex';
+
 const mapEmojiConfig = (row) => ({
   id: row.id,
   userId: row.user_id,
@@ -10,11 +12,8 @@ const sanitizeEmojiContent = (value) => {
   if (value == null) {
     return '';
   }
-  const emojiRegex = /\p{Extended_Pictographic}/u;
-  return Array.from(value)
-    .filter((char) => emojiRegex.test(char))
-    .join('')
-    .trim();
+  const matches = value.match(emojiRegex()) ?? [];
+  return matches.join('').trim();
 };
 
 export const emojiConfigTypeDefs = `

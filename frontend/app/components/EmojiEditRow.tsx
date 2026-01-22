@@ -45,7 +45,7 @@ export default function EmojiEditRow({
           roundness: RADIUS,
           colors: { outline: 'transparent', background: WHITE }
         }}
-        contentStyle={{ fontSize: 15, color: '#1f2933' }}
+        contentStyle={{ fontSize: 15, color: '#1f2933', letterSpacing: 6 }}
         onBlur={handleBlur}
       />
       <IconButton

@@ -1,3 +1,4 @@
+import emojiRegex from 'emoji-regex';
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GRAY_TEXT } from '../../styles/colors';
@@ -20,11 +21,9 @@ type EmojiSelectorProps = {
 };
 
 const sanitizeEmojis = (value: string) => {
-  const emojiRegex = /\p{Extended_Pictographic}/u;
-  return Array.from(value).filter((char) => emojiRegex.test(char));
+  return value.match(emojiRegex()) ?? [];
 };
 
-const formatEmojiInput = (value: string) => sanitizeEmojis(value).join(' ');
 const DEFAULT_EMOJIS = ['🙂', '😩', '😠', '🥱'];
 
 export default function EmojiSelector({
@@ -55,12 +54,12 @@ export default function EmojiSelector({
   }, [isEditingEmojis, onEditingChange]);
 
   const handleEditEmojis = () => {
-    setEmojiInput(emojis.join(' '));
+    setEmojiInput(emojis.join(''));
     setIsEditingEmojis(true);
   };
 
   const handleEmojiInputChange = (value: string) => {
-    setEmojiInput(formatEmojiInput(value));
+    setEmojiInput(value);
   };
 
   const handleSaveEmojis = async () => {
@@ -98,7 +97,7 @@ export default function EmojiSelector({
   };
 
   const handleCancelEmojis = () => {
-    setEmojiInput(emojis.join(' '));
+    setEmojiInput(emojis.join(''));
     setIsEditingEmojis(false);
     onFinishEditing?.();
   };

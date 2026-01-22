@@ -21,6 +21,7 @@
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
+    "emoji-regex": "^10.6.0",
     "express": "^5.2.1",
     "graphql": "^16.11.0",
     "graphql-http": "^1.22.4",
