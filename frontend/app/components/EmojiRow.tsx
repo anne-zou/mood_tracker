@@ -2,12 +2,14 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
 import { WHITE } from '../../styles/colors';
 import { RADIUS } from '../../styles/textStyles';
+import { createDimmedStyle } from '../../styles/dimming';
 
 type EmojiRowProps = {
   emojis: string[];
   onEmojiPress: (emoji: string) => void;
   onActionPress: () => void;
   actionIconColor: string;
+  dimmed?: boolean;
 };
 
 export default function EmojiRow({
@@ -15,9 +17,10 @@ export default function EmojiRow({
   onEmojiPress,
   onActionPress,
   actionIconColor,
+  dimmed = false,
 }: EmojiRowProps) {
   return (
-    <View style={styles.emojiRow}>
+    <View style={[styles.emojiRow, dimmed && styles.dimmed]}>
       {emojis.map((emoji) => (
         <Pressable key={emoji} onPress={() => onEmojiPress(emoji)} style={styles.emojiButton}>
           <Text style={styles.emojiText}>{emoji}</Text>
@@ -41,12 +44,14 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 12,
     paddingBottom: 12,
+    elevation: 1,
   },
   emojiButton: {
     backgroundColor: WHITE,
     borderRadius: RADIUS,
     paddingHorizontal: 10,
     paddingVertical: 6,
+    elevation: 1,
   },
   emojiText: {
     fontSize: 18,
@@ -58,4 +63,5 @@ const styles = StyleSheet.create({
     width: 40,
     height: 30,
   },
+  dimmed: createDimmedStyle(),
 });

@@ -4,9 +4,11 @@ import { Text, TextInput, IconButton } from 'react-native-paper';
 import { GRAY_TEXT, WHITE } from '../../styles/colors';
 import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../../styles/textStyles';
 import EmojiRow from './EmojiRow';
+import { createDimmedStyle } from '../../styles/dimming';
 
 type EmojiSelectorProps = {
   onEmojiPress: (emoji: string) => void;
+  dimmed?: boolean;
 };
 
 const sanitizeEmojis = (value: string) => {
@@ -16,7 +18,7 @@ const sanitizeEmojis = (value: string) => {
 
 const formatEmojiInput = (value: string) => sanitizeEmojis(value).join(' ');
 
-export default function EmojiSelector({ onEmojiPress }: EmojiSelectorProps) {
+export default function EmojiSelector({ onEmojiPress, dimmed = false }: EmojiSelectorProps) {
   const [emojis, setEmojis] = useState(['🙂', '😩', '😠', '🥱']);
   const [isEditingEmojis, setIsEditingEmojis] = useState(false);
   const [emojiInput, setEmojiInput] = useState(emojis.join(' '));
@@ -38,7 +40,7 @@ export default function EmojiSelector({ onEmojiPress }: EmojiSelectorProps) {
 
   if (isEditingEmojis) {
     return (
-      <View style={styles.editRow}>
+      <View style={[styles.editRow, dimmed && styles.dimmed]}>
         <Text variant="bodyMedium" style={styles.editLabel}>Edit emojis:</Text>
         <TextInput
           value={emojiInput}
@@ -72,6 +74,7 @@ export default function EmojiSelector({ onEmojiPress }: EmojiSelectorProps) {
       onEmojiPress={onEmojiPress}
       onActionPress={handleEditEmojis}
       actionIconColor={GRAY_TEXT}
+      dimmed={dimmed}
     />
   );
 }
@@ -83,6 +86,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 12,
     paddingBottom: 12,
+    elevation: 1,
   },
   editLabel: {
     color: GRAY_TEXT,
@@ -96,4 +100,5 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
   },
+  dimmed: createDimmedStyle(),
 });

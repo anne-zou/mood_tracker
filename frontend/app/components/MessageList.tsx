@@ -53,10 +53,12 @@ export default function MessageList({
         const nextEntry = entries[index + 1];
         const showDateSeparator =
           !nextEntry || getDayKey(nextEntry.time) !== getDayKey(item.time);
+        const isEditing = editingId === item.id;
+        const isAnotherEditing = editingId !== null && !isEditing;
 
         return (
           <View style={styles.messageRowWrapper}>
-            {showDateSeparator && <DateSeparator timestamp={item.time} />}
+            {showDateSeparator && <DateSeparator timestamp={item.time} dimmed={isAnotherEditing} />}
             <MessageRow
               item={item}
               textColor={textColor}

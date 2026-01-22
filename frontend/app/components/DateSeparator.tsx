@@ -1,9 +1,11 @@
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { GRAY_TEXT } from '../../styles/colors';
+import { createDimmedStyle } from '../../styles/dimming';
 
 type DateSeparatorProps = {
   timestamp: number;
+  dimmed?: boolean;
 };
 
 const formatDate = (timestamp: number) => {
@@ -21,9 +23,9 @@ const formatDate = (timestamp: number) => {
   }
 };
 
-export default function DateSeparator({ timestamp }: DateSeparatorProps) {
+export default function DateSeparator({ timestamp, dimmed = false }: DateSeparatorProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, dimmed && styles.dimmed]}>
       <View style={styles.line} />
       <Text style={styles.text}>{formatDate(timestamp)}</Text>
       <View style={styles.line} />
@@ -49,4 +51,5 @@ const styles = StyleSheet.create({
     color: GRAY_TEXT,
     fontSize: 12,
   },
+  dimmed: createDimmedStyle(),
 });

@@ -81,3 +81,41 @@ The app uses Supabase for authentication with Google OAuth:
 - OAuth redirects to `moodlogger://auth/callback`
 - Session state is managed by Supabase auth state listener
 - Backend validates JWT tokens from Supabase
+
+## UI Patterns
+
+### Edit Mode Dimming
+
+When a mood entry is being edited, all other UI elements are dimmed to create visual focus. This is a critical UX pattern that **MUST** be applied to all new UI components.
+
+**Implementation:**
+1. Import dimming utilities: `import { createDimmedStyle } from '../../styles/dimming';`
+2. Add `dimmed?: boolean` prop to your component's props type
+3. Apply dimmed style conditionally: `style={[styles.myComponent, dimmed && styles.dimmed]}`
+4. Add to StyleSheet: `dimmed: createDimmedStyle(),`
+5. Pass dimming state from parent: `dimmed={!!editingEntryId}` or `dimmed={isAnotherEditing}`
+
+**Example:**
+```typescript
+import { createDimmedStyle } from '../../styles/dimming';
+
+type MyComponentProps = {
+  content: string;
+  dimmed?: boolean;
+};
+
+export default function MyComponent({ content, dimmed = false }: MyComponentProps) {
+  return (
+    <View style={[styles.container, dimmed && styles.dimmed]}>
+      <Text>{content}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { padding: 10 },
+  dimmed: createDimmedStyle(),
+});
+```
+
+See `frontend/styles/dimming.ts` for complete documentation and examples.

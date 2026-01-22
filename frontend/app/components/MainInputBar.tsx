@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../../styles/textStyles';
+import { createDimmedStyle } from '../../styles/dimming';
 
 type MainInputBarProps = {
   value: string;
@@ -12,6 +13,7 @@ type MainInputBarProps = {
   backgroundColor: string;
   inputBackgroundColor: string;
   inputTextColor: string;
+  dimmed?: boolean;
 };
 
 export default function MainInputBar({
@@ -24,9 +26,10 @@ export default function MainInputBar({
   backgroundColor,
   inputBackgroundColor,
   inputTextColor,
+  dimmed = false,
 }: MainInputBarProps) {
   return (
-    <View style={[styles.inputBar, { backgroundColor }]}>
+    <View style={[styles.inputBar, { backgroundColor }, dimmed && styles.dimmed]}>
       <TextInput
         value={value}
         onChangeText={onChangeText}
@@ -59,9 +62,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     padding: 12,
+    elevation: 1,
   },
   input: {
     flex: 1,
     height: MOOD_INPUT_BAR_HEIGHT,
   },
+  dimmed: createDimmedStyle(),
 });

@@ -2,22 +2,29 @@ import { View, StyleSheet } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
 import { GRAY_TEXT } from '../../styles/colors';
 import { MoodEntry } from './MessageList';
+import { createDimmedStyle } from '../../styles/dimming';
 
 type MessageMetadataProps = {
   item: MoodEntry;
   textColor: string;
+  isEditing: boolean;
   onStartEdit: (entry: MoodEntry) => void;
+  onSaveEdit: () => void;
   onDelete: (entryId: string) => void;
+  dimmed?: boolean;
 };
 
 export default function MessageMetadata({
   item,
   textColor,
+  isEditing,
   onStartEdit,
+  onSaveEdit,
   onDelete,
+  dimmed = false,
 }: MessageMetadataProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, dimmed && styles.dimmed]}>
       <Text
         variant="bodySmall"
         numberOfLines={1}
@@ -30,13 +37,23 @@ export default function MessageMetadata({
         })}
       </Text>
       <View style={styles.actions}>
-        <IconButton
-          icon="pencil"
-          size={12}
-          iconColor={textColor}
-          onPress={() => onStartEdit(item)}
-          style={styles.actionButton}
-        />
+        {isEditing ? (
+          <IconButton
+            icon="check"
+            size={12}
+            iconColor={textColor}
+            onPress={onSaveEdit}
+            style={styles.actionButton}
+          />
+        ) : (
+          <IconButton
+            icon="pencil"
+            size={12}
+            iconColor={textColor}
+            onPress={() => onStartEdit(item)}
+            style={styles.actionButton}
+          />
+        )}
         <IconButton
           icon="trash-can"
           size={12}
@@ -68,4 +85,5 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
   },
+  dimmed: createDimmedStyle(),
 });

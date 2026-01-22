@@ -10,6 +10,7 @@ import {
 import { ActivityIndicator } from 'react-native-paper';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL, WHITE } from '../styles/colors';
+import { createDimmedStyle } from '../styles/dimming';
 import MainInputBar from './components/MainInputBar';
 import MessageList, { MoodEntry } from './components/MessageList';
 import HamburgerMenu from './components/HamburgerMenu';
@@ -280,9 +281,10 @@ export default function HomeScreen() {
    */
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, !!editingEntryId && styles.dimmed]}>
         <HamburgerMenu />
       </View>
+
       <KeyboardAvoidingView
         style={styles.inner}
         behavior={Platform.select({ ios: 'padding', android: undefined })}
@@ -310,8 +312,9 @@ export default function HomeScreen() {
           backgroundColor={SCREEN_BACKGROUND}
           inputBackgroundColor={WHITE}
           inputTextColor="#1f2933"
+          dimmed={!!editingEntryId}
         />
-        <EmojiSelector onEmojiPress={handleAddEmoji} />
+        <EmojiSelector onEmojiPress={handleAddEmoji} dimmed={!!editingEntryId} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -336,4 +339,5 @@ const styles = StyleSheet.create({
   inner: {
     flex: 1,
   },
+  dimmed: createDimmedStyle(),
 });
