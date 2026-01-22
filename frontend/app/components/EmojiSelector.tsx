@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { GRAY_TEXT } from '../../styles/colors';
 import EmojiRow from './EmojiRow';
 import EmojiEditRow from './EmojiEditRow';
@@ -49,21 +50,31 @@ export default function EmojiSelector({
     setIsEditingEmojis(false);
   };
 
-  return isEditingEmojis ? (
-    <EmojiEditRow
-      value={emojiInput}
-      onChangeText={handleEmojiInputChange}
-      onSave={handleSaveEmojis}
-      onCancel={handleCancelEmojis}
-      dimmed={dimmed}
-    />
-  ) : (
-    <EmojiRow
-      emojis={emojis}
-      onEmojiPress={onEmojiPress}
-      onActionPress={handleEditEmojis}
-      actionIconColor={GRAY_TEXT}
-      dimmed={dimmed}
-    />
+  return (
+    <View style={styles.container}>
+      {isEditingEmojis ? (
+        <EmojiEditRow
+          value={emojiInput}
+          onChangeText={handleEmojiInputChange}
+          onSave={handleSaveEmojis}
+          onCancel={handleCancelEmojis}
+          dimmed={dimmed}
+        />
+      ) : (
+        <EmojiRow
+          emojis={emojis}
+          onEmojiPress={onEmojiPress}
+          onActionPress={handleEditEmojis}
+          actionIconColor={GRAY_TEXT}
+          dimmed={dimmed}
+        />
+      )}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 8,
+  },
+});
