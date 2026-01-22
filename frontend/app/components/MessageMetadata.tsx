@@ -10,6 +10,7 @@ type MessageMetadataProps = {
   isEditing: boolean;
   onStartEdit: (entry: MoodEntry) => void;
   onSaveEdit: () => void;
+  onCancelEdit: () => void;
   onDelete: (entryId: string) => void;
   dimmed?: boolean;
 };
@@ -20,6 +21,7 @@ export default function MessageMetadata({
   isEditing,
   onStartEdit,
   onSaveEdit,
+  onCancelEdit,
   onDelete,
   dimmed = false,
 }: MessageMetadataProps) {
@@ -38,29 +40,40 @@ export default function MessageMetadata({
       </Text>
       <View style={styles.actions}>
         {isEditing ? (
-          <IconButton
-            icon="check"
-            size={12}
-            iconColor={textColor}
-            onPress={onSaveEdit}
-            style={styles.actionButton}
-          />
+          <>
+            <IconButton
+              icon="check"
+              size={12}
+              iconColor={textColor}
+              onPress={onSaveEdit}
+              style={styles.actionButton}
+            />
+            <IconButton
+              icon="close"
+              size={12}
+              iconColor={textColor}
+              onPress={onCancelEdit}
+              style={styles.actionButton}
+            />
+          </>
         ) : (
-          <IconButton
-            icon="pencil"
-            size={12}
-            iconColor={textColor}
-            onPress={() => onStartEdit(item)}
-            style={styles.actionButton}
-          />
+          <>
+            <IconButton
+              icon="pencil"
+              size={12}
+              iconColor={textColor}
+              onPress={() => onStartEdit(item)}
+              style={styles.actionButton}
+            />
+            <IconButton
+              icon="trash-can"
+              size={12}
+              iconColor={textColor}
+              onPress={() => onDelete(item.id)}
+              style={styles.actionButton}
+            />
+          </>
         )}
-        <IconButton
-          icon="trash-can"
-          size={12}
-          iconColor={textColor}
-          onPress={() => onDelete(item.id)}
-          style={styles.actionButton}
-        />
       </View>
     </View>
   );

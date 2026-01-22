@@ -12,6 +12,7 @@ type MessageRowProps = {
   onChangeEditingText: (value: string) => void;
   onStartEdit: (entry: MoodEntry) => void;
   onSaveEdit: () => void;
+  onCancelEdit: () => void;
   onDelete: (entryId: string) => void;
 };
 
@@ -24,6 +25,7 @@ export default function MessageRow({
   onChangeEditingText,
   onStartEdit,
   onSaveEdit,
+  onCancelEdit,
   onDelete,
 }: MessageRowProps) {
   const isEditing = editingId === item.id;
@@ -47,6 +49,7 @@ export default function MessageRow({
         isEditing={isEditing}
         onStartEdit={onStartEdit}
         onSaveEdit={onSaveEdit}
+        onCancelEdit={onCancelEdit}
         onDelete={onDelete}
         dimmed={isAnotherEditing}
       />

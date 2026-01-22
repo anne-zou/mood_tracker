@@ -23,6 +23,7 @@ type MessageListProps = {
   onChangeEditingText: (value: string) => void;
   onStartEdit: (entry: MoodEntry) => void;
   onSaveEdit: () => void;
+  onCancelEdit: () => void;
   onDelete: (entryId: string) => void;
 };
 
@@ -41,6 +42,7 @@ export default function MessageList({
   onChangeEditingText,
   onStartEdit,
   onSaveEdit,
+  onCancelEdit,
   onDelete,
 }: MessageListProps) {
   return (
@@ -68,6 +70,7 @@ export default function MessageList({
               onChangeEditingText={onChangeEditingText}
               onStartEdit={onStartEdit}
               onSaveEdit={onSaveEdit}
+              onCancelEdit={onCancelEdit}
               onDelete={onDelete}
             />
           </View>

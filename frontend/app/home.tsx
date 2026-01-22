@@ -252,6 +252,19 @@ export default function HomeScreen() {
   };
 
   /**
+   * Callback function to cancel editing an entry
+   */
+  const handleCancelEditEntry = () => {
+    if (!editingEntryId) {
+      return;
+    }
+
+    const originalEntry = entries.find(e => e.id === editingEntryId);
+    setEditingEntryText(originalEntry?.content ?? '');
+    setEditingEntryId(null);
+  };
+
+  /**
    * Callback function to handle deleting an entry
    */
   const handleDeleteEntry = async (entryId: string) => {
@@ -299,6 +312,7 @@ export default function HomeScreen() {
           onChangeEditingText={setEditingEntryText}
           onStartEdit={handleStartEditEntry}
           onSaveEdit={handleSaveEditEntry}
+          onCancelEdit={handleCancelEditEntry}
           onDelete={handleDeleteEntry}
         />
 
