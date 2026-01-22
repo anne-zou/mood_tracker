@@ -11,7 +11,7 @@ import { ActivityIndicator } from 'react-native-paper';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL, WHITE } from '../styles/colors';
 import MainInputBar from './components/MainInputBar';
-import MessageList, { MessageEntry } from './components/MessageList';
+import MessageList, { MoodEntry } from './components/MessageList';
 import HamburgerMenu from './components/HamburgerMenu';
 import EmojiSelector from './components/EmojiSelector';
 import { supabase } from '../lib/supabase';
@@ -74,7 +74,7 @@ export default function HomeScreen() {
   /**
    * Parse the mood entries into a list of MessageEntry objects 
    */
-  const entries: MessageEntry[] = data?.queryMoodEntries?.map((entry: MoodEntryResponse) => ({
+  const entries: MoodEntry[] = data?.queryMoodEntries?.map((entry: MoodEntryResponse) => ({
     userId: entry.userId,
     id: entry.id,
     content: entry.content,
@@ -207,7 +207,7 @@ export default function HomeScreen() {
   /**
    * Callback function to handle starting to edit an entry
    */
-  const handleStartEditEntry = (entry: MessageEntry) => {
+  const handleStartEditEntry = (entry: MoodEntry) => {
     setEditingEntryId(entry.id);
     setEditingEntryText(entry.content);
   };

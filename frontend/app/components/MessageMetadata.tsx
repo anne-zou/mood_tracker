@@ -1,12 +1,12 @@
 import { View, StyleSheet } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
 import { GRAY_TEXT } from '../../styles/colors';
-import { MessageEntry } from './MessageList';
+import { MoodEntry } from './MessageList';
 
 type MessageMetadataProps = {
-  item: MessageEntry;
+  item: MoodEntry;
   textColor: string;
-  onStartEdit: (entry: MessageEntry) => void;
+  onStartEdit: (entry: MoodEntry) => void;
   onDelete: (entryId: string) => void;
 };
 

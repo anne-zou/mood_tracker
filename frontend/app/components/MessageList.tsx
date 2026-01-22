@@ -4,7 +4,7 @@ import { GRAY_TEXT } from '../../styles/colors';
 import MessageRow from './MessageRow';
 import DateSeparator from './DateSeparator';
 
-export type MessageEntry = {
+export type MoodEntry = {
   id: string;
   userId: string;
   content: string;
@@ -14,14 +14,14 @@ export type MessageEntry = {
 };
 
 type MessageListProps = {
-  entries: MessageEntry[];
+  entries: MoodEntry[];
   emptyText: string;
   textColor: string;
   textSize: number;
   editingId: string | null;
   editingText: string;
   onChangeEditingText: (value: string) => void;
-  onStartEdit: (entry: MessageEntry) => void;
+  onStartEdit: (entry: MoodEntry) => void;
   onSaveEdit: () => void;
   onDelete: (entryId: string) => void;
 };

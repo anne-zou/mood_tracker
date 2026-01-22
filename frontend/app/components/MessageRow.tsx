@@ -1,16 +1,16 @@
 import { View, StyleSheet } from 'react-native';
-import { MessageEntry } from './MessageList';
+import { MoodEntry } from './MessageList';
 import MessageBubble from './MessageBubble';
 import MessageMetadata from './MessageMetadata';
 
 type MessageRowProps = {
-  item: MessageEntry;
+  item: MoodEntry;
   textColor: string;
   textSize: number;
   editingId: string | null;
   editingText: string;
   onChangeEditingText: (value: string) => void;
-  onStartEdit: (entry: MessageEntry) => void;
+  onStartEdit: (entry: MoodEntry) => void;
   onSaveEdit: () => void;
   onDelete: (entryId: string) => void;
 };
