@@ -7,13 +7,13 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Menu, IconButton, TextInput, Text, ActivityIndicator } from 'react-native-paper';
+import { ActivityIndicator } from 'react-native-paper';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../styles/textStyles';
 import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL, WHITE } from '../styles/colors';
-import EmojiRow from './components/EmojiRow';
 import MainInputBar from './components/MainInputBar';
 import MessageList, { MessageEntry } from './components/MessageList';
+import HamburgerMenu from './components/HamburgerMenu';
+import EmojiSelector from './components/EmojiSelector';
 import { supabase } from '../lib/supabase';
 import {
   QUERY_MOOD_ENTRIES,
@@ -33,12 +33,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [input, setInput] = useState('');
-  const [emojis, setEmojis] = useState(['🙂', '😩', '😠', '🥱']);
-  const [isEditingEmojis, setIsEditingEmojis] = useState(false);
-  const [emojiInput, setEmojiInput] = useState(emojis.join(' '));
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [editingEntryText, setEditingEntryText] = useState('');
-  const [menuVisible, setMenuVisible] = useState(false);
 
   const { data, loading, error } = useQuery<QueryMoodEntriesResponse>(QUERY_MOOD_ENTRIES, {
     variables: { limit: 100 },
@@ -232,33 +228,6 @@ export default function HomeScreen() {
     }
   };
 
-  const formatEmojiInput = (value: string) => sanitizeEmojis(value).join(' ');
-
-  const handleEditEmojis = () => {
-    setEmojiInput(emojis.join(' '));
-    setIsEditingEmojis(true);
-  };
-
-  const sanitizeEmojis = (value: string) => {
-    const emojiRegex = /\p{Extended_Pictographic}/u;
-    return Array.from(value).filter((char) => emojiRegex.test(char));
-  };
-
-  const handleEmojiInputChange = (value: string) => {
-    setEmojiInput(formatEmojiInput(value));
-  };
-
-  const handleSaveEmojis = () => {
-    const nextEmojis = sanitizeEmojis(emojiInput);
-    setEmojis(nextEmojis);
-    setIsEditingEmojis(false);
-  };
-
-  const handleSignOut = async () => {
-    setMenuVisible(false);
-    await supabase.auth.signOut();
-  };
-
   if (loading && !data) {
     return (
       <SafeAreaView style={styles.container}>
@@ -272,20 +241,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Menu
-          visible={menuVisible}
-          onDismiss={() => setMenuVisible(false)}
-          anchor={
-            <IconButton
-              icon="menu"
-              size={24}
-              iconColor={DARK_NEUTRAL}
-              onPress={() => setMenuVisible(true)}
-            />
-          }
-        >
-          <Menu.Item onPress={handleSignOut} title="Sign out" leadingIcon="logout" />
-        </Menu>
+        <HamburgerMenu />
       </View>
       <KeyboardAvoidingView
         style={styles.inner}
@@ -315,40 +271,7 @@ export default function HomeScreen() {
           inputBackgroundColor={WHITE}
           inputTextColor="#1f2933"
         />
-        {isEditingEmojis ? (
-          <View style={styles.emojiEditRow}>
-            <Text variant="bodyMedium" style={styles.emojiEditLabel}>Edit emojis:</Text>
-            <TextInput
-              value={emojiInput}
-              onChangeText={handleEmojiInputChange}
-              mode="outlined"
-              dense
-              returnKeyType="done"
-              onSubmitEditing={handleSaveEmojis}
-              style={styles.emojiEditInput}
-              outlineStyle={{ borderWidth: 0 }}
-              theme={{
-                roundness: RADIUS,
-                colors: { outline: 'transparent', background: WHITE }
-              }}
-              contentStyle={{ fontSize: baseTextSize, color: '#1f2933' }}
-            />
-            <IconButton
-              icon="check"
-              size={16}
-              iconColor={GRAY_TEXT}
-              onPress={handleSaveEmojis}
-              style={styles.emojiEditSaveButton}
-            />
-          </View>
-        ) : (
-          <EmojiRow
-            emojis={emojis}
-            onEmojiPress={handleAddEmoji}
-              onActionPress={handleEditEmojis}
-            actionIconColor={GRAY_TEXT}
-          />
-        )}
+        <EmojiSelector onEmojiPress={handleAddEmoji} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -372,24 +295,5 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,
-  },
-  emojiEditRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingBottom: 12,
-  },
-  emojiEditLabel: {
-    color: GRAY_TEXT,
-    paddingLeft: 12,
-  },
-  emojiEditInput: {
-    height: MOOD_INPUT_BAR_HEIGHT,
-  },
-  emojiEditSaveButton: {
-    margin: 0,
-    width: 28,
-    height: 28,
   },
 });
