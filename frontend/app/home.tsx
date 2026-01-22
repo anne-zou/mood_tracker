@@ -223,7 +223,7 @@ export default function HomeScreen() {
   };
 
   /**
-   * Callback function to handle adding an emoji to the input
+   * Callback function for pressing an emoji button to enter it into the main input
    */
   const handleAddEmoji = (emoji: string) => {
     setInput((prev) => (prev ? `${prev} ${emoji}` : emoji));
