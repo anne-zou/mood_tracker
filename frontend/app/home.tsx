@@ -36,12 +36,65 @@ export default function HomeScreen() {
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [editingEntryText, setEditingEntryText] = useState('');
 
+  /**
+   * Check if user is authenticated and set the user ID
+   */
+  useEffect(() => {
+    // Check if user is authenticated
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.replace('/');
+      } else {
+        setUserId(session.user.id);
+      }
+    });
+
+    // Listen for auth state changes (e.g., sign out)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        router.replace('/');
+        setUserId(null);
+      } else {
+        setUserId(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
+
+  /**
+   * Query the mood entries
+   */
   const { data, loading, error } = useQuery<QueryMoodEntriesResponse>(QUERY_MOOD_ENTRIES, {
     variables: { limit: 100 },
     skip: !userId || typeof window === 'undefined',
     errorPolicy: 'all',
   });
 
+  /**
+   * Parse the mood entries into a list of MessageEntry objects 
+   */
+  const entries: MessageEntry[] = data?.queryMoodEntries?.map((entry: MoodEntryResponse) => ({
+    userId: entry.userId,
+    id: entry.id,
+    content: entry.content,
+    time: Number(entry.time),
+    createdAt: Number(entry.createdAt),
+    updatedAt: Number(entry.updatedAt),
+  })) || [];
+
+  /**
+   * Handle errors from the query
+   */
+  useEffect(() => {
+    if (error) {
+      console.error('GraphQL Error:', error);
+    }
+  }, [error]);
+
+  /**
+   * Mutation to create a new mood entry
+   */
   const [createMoodEntry] = useMutation<CreateMoodEntryResponse>(CREATE_MOOD_ENTRY, {
     optimisticResponse: (vars) => {
       const now = Date.now().toString();
@@ -78,6 +131,9 @@ export default function HomeScreen() {
     },
   });
 
+  /**
+   * Mutation to update a mood entry
+   */
   const [updateMoodEntry] = useMutation<UpdateMoodEntryResponse>(UPDATE_MOOD_ENTRY, {
     optimisticResponse: (vars) => {
       const entry = entries.find(e => e.id === vars.id);
@@ -95,6 +151,9 @@ export default function HomeScreen() {
     },
   });
 
+  /**
+   * Mutation to delete a mood entry
+   */
   const [deleteMoodEntry] = useMutation<DeleteMoodEntryResponse>(DELETE_MOOD_ENTRY, {
     optimisticResponse: (vars) => ({
       deleteMoodEntry: {
@@ -124,44 +183,9 @@ export default function HomeScreen() {
     },
   });
 
-  useEffect(() => {
-    // Check if user is authenticated
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        router.replace('/');
-      } else {
-        setUserId(session.user.id);
-      }
-    });
-
-    // Listen for auth state changes (e.g., sign out)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        router.replace('/');
-        setUserId(null);
-      } else {
-        setUserId(session.user.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [router]);
-
-  const entries: MessageEntry[] = data?.queryMoodEntries?.map((entry: MoodEntryResponse) => ({
-    userId: entry.userId,
-    id: entry.id,
-    content: entry.content,
-    time: Number(entry.time),
-    createdAt: Number(entry.createdAt),
-    updatedAt: Number(entry.updatedAt),
-  })) || [];
-
-  useEffect(() => {
-    if (error) {
-      console.error('GraphQL Error:', error);
-    }
-  }, [error]);
-
+  /**
+   * Callback function to handle creating a new mood entry
+   */
   const handleSend = async () => {
     const trimmed = input.trim();
     setInput('');
@@ -180,15 +204,25 @@ export default function HomeScreen() {
     }
   };
 
-  const handleAddEmoji = (emoji: string) => {
-    setInput((prev) => (prev ? `${prev} ${emoji}` : emoji));
-  };
-
+  /**
+   * Callback function to handle starting to edit an entry
+   */
   const handleStartEditEntry = (entry: MessageEntry) => {
     setEditingEntryId(entry.id);
     setEditingEntryText(entry.content);
   };
 
+
+  /**
+   * Callback function to handle adding an emoji to the input
+   */
+  const handleAddEmoji = (emoji: string) => {
+    setInput((prev) => (prev ? `${prev} ${emoji}` : emoji));
+  };
+
+  /**
+   * Callback function to handle saving an edited entry
+   */
   const handleSaveEditEntry = async () => {
     if (!editingEntryId) {
       return;
@@ -216,6 +250,9 @@ export default function HomeScreen() {
     }
   };
 
+  /**
+   * Callback function to handle deleting an entry
+   */
   const handleDeleteEntry = async (entryId: string) => {
     try {
       await deleteMoodEntry({
@@ -238,6 +275,9 @@ export default function HomeScreen() {
     );
   }
 
+  /**
+   * Render the home screen
+   */
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
