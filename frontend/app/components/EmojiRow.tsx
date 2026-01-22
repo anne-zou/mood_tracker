@@ -1,8 +1,8 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
 import { WHITE } from '../../styles/colors';
-import { RADIUS } from '../../styles/textStyles';
 import { createDimmedStyle } from '../../styles/dimming';
+import { MOOD_INPUT_BAR_HEIGHT } from '../../styles/textStyles';
 
 type EmojiRowProps = {
   emojis: string[];
@@ -41,6 +41,8 @@ const styles = StyleSheet.create({
   emojiRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'center',
+
     gap: 8,
     paddingHorizontal: 12,
     paddingBottom: 12,
@@ -48,20 +50,22 @@ const styles = StyleSheet.create({
   },
   emojiButton: {
     backgroundColor: WHITE,
-    borderRadius: RADIUS,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    borderRadius: MOOD_INPUT_BAR_HEIGHT / 2,
+    width: MOOD_INPUT_BAR_HEIGHT,
+    height: MOOD_INPUT_BAR_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center',
     elevation: 1,
   },
   emojiText: {
-    fontSize: 18,
+    fontSize: 15,
   },
   emojiAddButton: {
     backgroundColor: WHITE,
-    borderRadius: 16,
+    borderRadius: MOOD_INPUT_BAR_HEIGHT / 2,
     margin: 0,
-    width: 40,
-    height: 30,
+    width: MOOD_INPUT_BAR_HEIGHT,
+    height: MOOD_INPUT_BAR_HEIGHT,
   },
   dimmed: createDimmedStyle(),
 });

@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
   editRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
     paddingHorizontal: 12,
     paddingBottom: 12,
