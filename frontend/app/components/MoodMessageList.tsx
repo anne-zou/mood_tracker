@@ -26,6 +26,18 @@ type MoodMessageListProps = {
   onDelete: (entryId: string) => void;
 };
 
+const getDayKey = (timestamp: number) => {
+  const date = new Date(timestamp);
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+};
+
+const formatDayLabel = (timestamp: number) =>
+  new Date(timestamp).toLocaleDateString([], {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
 export default function MoodMessageList({
   entries,
   emptyText,
@@ -44,8 +56,20 @@ export default function MoodMessageList({
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.listContent}
       inverted
-      renderItem={({ item }) => (
+      renderItem={({ item, index }) => {
+        const nextEntry = entries[index + 1];
+        const showDateSeparator =
+          !nextEntry || getDayKey(nextEntry.time) !== getDayKey(item.time);
+
+        return (
         <View style={styles.messageRow}>
+            {showDateSeparator && (
+              <View style={styles.dateSeparator}>
+                <View style={styles.dateSeparatorLine} />
+                <Text style={styles.dateSeparatorText}>{formatDayLabel(item.time)}</Text>
+                <View style={styles.dateSeparatorLine} />
+              </View>
+            )}
           <View style={styles.messageBubbleWrapper}>
             <Surface style={styles.messageBubble} elevation={0}>
               <Text style={[styles.messageText, { ...fontConfig, color: textColor, fontSize: textSize }]}>
@@ -103,7 +127,8 @@ export default function MoodMessageList({
               />
             </View>
           </View></View>
-      )}
+        );
+      }}
       ListEmptyComponent={
         <View style={styles.emptyState}>
           <Text style={[styles.emptyText, { color: textColor, fontSize: textSize }]}>
@@ -128,6 +153,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     width: '100%',
+    flexWrap: 'wrap',
   },
   messageBubbleWrapper: {
     position: 'relative',
@@ -152,6 +178,23 @@ const styles = StyleSheet.create({
   },
   messageText: {
     color: GRAY_TEXT,
+  },
+  dateSeparator: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  dateSeparatorLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: GRAY_TEXT,
+    opacity: 0.35,
+  },
+  dateSeparatorText: {
+    color: GRAY_TEXT,
+    fontSize: 12,
   },
   messageTime: {
     color: GRAY_TEXT,
