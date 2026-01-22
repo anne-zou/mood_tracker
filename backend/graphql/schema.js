@@ -5,9 +5,16 @@ import {
   moodEntryQueryFields,
   moodEntryTypeDefs,
 } from './moodEntries/moodEntries.js';
+import {
+  createEmojiConfigResolvers,
+  emojiConfigMutationFields,
+  emojiConfigQueryFields,
+  emojiConfigTypeDefs,
+} from './emojiConfigs/emojiConfigs.js';
 
 export const schema = buildSchema(`
   ${moodEntryTypeDefs}
+  ${emojiConfigTypeDefs}
 
   type DeleteResponse {
     deleted: Boolean!
@@ -16,14 +23,17 @@ export const schema = buildSchema(`
   type Query {
     health: String!
     ${moodEntryQueryFields}
+    ${emojiConfigQueryFields}
   }
 
   type Mutation {
     ${moodEntryMutationFields}
+    ${emojiConfigMutationFields}
   }
 `);
 
 export const createRootResolvers = () => ({
   health: () => 'ok',
   ...createMoodEntryResolvers(),
+  ...createEmojiConfigResolvers(),
 });

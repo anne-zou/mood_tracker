@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node --import dotenv/config server.js",
-    "test": "node --test --import dotenv/config"
+    "test": "node --test --import dotenv/config",
+    "test:emojiConfigs": "node --test --import dotenv/config graphql/emojiConfigs/emojiConfigs.test.js",
+    "test:moodEntries": "node --test --import dotenv/config graphql/moodEntries/moodEntries.test.js"
   },
   "keywords": [],
   "author": "",

@@ -31,7 +31,14 @@ npm start
 
 ```bash
 cd backend
-node --test --import dotenv/config
+npm test
+```
+
+Single-suite runs:
+```bash
+cd backend
+npm run test:emojiConfigs
+npm run test:moodEntries
 ```
 
 ## Environment Variables

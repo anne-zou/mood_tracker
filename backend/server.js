@@ -4,6 +4,7 @@ import pg from 'pg';
 import { createHandler } from 'graphql-http/lib/use/express';
 import { createRootResolvers, schema } from './graphql/schema.js';
 import { requireSupabase } from './supabase.js';
+import { ensureTablesQuery } from './db/ensureTables.js';
 
 const { Pool } = pg;
 
@@ -113,16 +114,7 @@ app.listen(PORT, async () => {
  */
 const ensureTables = async () => {
   if (!db) return;
-  await db.query(`
-    CREATE TABLE IF NOT EXISTS mood_entries (
-      id BIGSERIAL PRIMARY KEY,
-      user_id TEXT NOT NULL,
-      content TEXT NOT NULL,
-      time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `);
+  await db.query(ensureTablesQuery);
 };
 
 /**

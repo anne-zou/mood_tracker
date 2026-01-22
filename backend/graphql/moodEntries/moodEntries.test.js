@@ -56,7 +56,7 @@ test('moodEntries CRUD flow', { skip: !hasDb }, async () => {
   const createResult = await runGraphql(
     `
       mutation CreateMoodEntry($content: String!, $time: String!) {
-        createMoodEntry(content: $content, time: $time, userId: "123") {
+        createMoodEntry(content: $content, time: $time) {
           id
           content
         }
@@ -129,19 +129,9 @@ test.after(async () => {
 test.before(async () => {
   if (!db) return;
   await db.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id BIGSERIAL PRIMARY KEY,
-      email TEXT UNIQUE
-    );
-  `);
-  await db.query('INSERT INTO users (id, email) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING', [
-    123,
-    'test-123@example.com',
-  ]);
-  await db.query(`
     CREATE TABLE IF NOT EXISTS mood_entries (
       id BIGSERIAL PRIMARY KEY,
-      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      user_id TEXT NOT NULL,
       content TEXT NOT NULL,
       time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
