@@ -1,10 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text, TextInput, IconButton } from 'react-native-paper';
-import { GRAY_TEXT, WHITE } from '../../styles/colors';
-import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../../styles/textStyles';
+import { useEffect, useState } from 'react';
+import { GRAY_TEXT } from '../../styles/colors';
 import EmojiRow from './EmojiRow';
-import { createDimmedStyle } from '../../styles/dimming';
+import EmojiEditRow from './EmojiEditRow';
 
 type EmojiSelectorProps = {
   onEmojiPress: (emoji: string) => void;
@@ -27,7 +24,6 @@ export default function EmojiSelector({
   const [emojis, setEmojis] = useState(['🙂', '😩', '😠', '🥱']);
   const [isEditingEmojis, setIsEditingEmojis] = useState(false);
   const [emojiInput, setEmojiInput] = useState(emojis.join(' '));
-  const inputRef = useRef<any>(null);
 
   useEffect(() => {
     onEditingChange?.(isEditingEmojis);
@@ -48,45 +44,20 @@ export default function EmojiSelector({
     setIsEditingEmojis(false);
   };
 
-  const handleBlur = () => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+  const handleCancelEmojis = () => {
+    setEmojiInput(emojis.join(' '));
+    setIsEditingEmojis(false);
   };
 
-  if (isEditingEmojis) {
-    return (
-      <View style={[styles.editRow, dimmed && styles.dimmed]}>
-        <Text variant="bodyMedium" style={styles.editLabel}>Edit emojis:</Text>
-        <TextInput
-          ref={inputRef}
-          value={emojiInput}
-          onChangeText={handleEmojiInputChange}
-          mode="outlined"
-          dense
-          returnKeyType="done"
-          onSubmitEditing={handleSaveEmojis}
-          style={styles.editInput}
-          outlineStyle={{ borderWidth: 0 }}
-          theme={{
-            roundness: RADIUS,
-            colors: { outline: 'transparent', background: WHITE }
-          }}
-          contentStyle={{ fontSize: 15, color: '#1f2933' }}
-          onBlur={handleBlur}
-        />
-        <IconButton
-          icon="check"
-          size={16}
-          iconColor={GRAY_TEXT}
-          onPress={handleSaveEmojis}
-          style={styles.saveButton}
-        />
-      </View>
-    );
-  }
-
-  return (
+  return isEditingEmojis ? (
+    <EmojiEditRow
+      value={emojiInput}
+      onChangeText={handleEmojiInputChange}
+      onSave={handleSaveEmojis}
+      onCancel={handleCancelEmojis}
+      dimmed={dimmed}
+    />
+  ) : (
     <EmojiRow
       emojis={emojis}
       onEmojiPress={onEmojiPress}
@@ -96,28 +67,3 @@ export default function EmojiSelector({
     />
   );
 }
-
-const styles = StyleSheet.create({
-  editRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingBottom: 12,
-    elevation: 1,
-  },
-  editLabel: {
-    color: GRAY_TEXT,
-    paddingLeft: 12,
-  },
-  editInput: {
-    height: MOOD_INPUT_BAR_HEIGHT,
-  },
-  saveButton: {
-    margin: 0,
-    width: 28,
-    height: 28,
-  },
-  dimmed: createDimmedStyle(),
-});
