@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -37,6 +37,12 @@ export default function HomeScreen() {
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [editingEntryText, setEditingEntryText] = useState('');
   const [isEditingEmojis, setIsEditingEmojis] = useState(false);
+  const mainInputRef = useRef<any>(null);
+  const focusMainInput = () => {
+    requestAnimationFrame(() => {
+      mainInputRef.current?.focus();
+    });
+  };
 
   /**
    * Check if user is authenticated and set the user ID
@@ -203,6 +209,8 @@ export default function HomeScreen() {
       });
     } catch (error) {
       console.error('Error creating mood entry:', error);
+    } finally {
+      focusMainInput();
     }
   };
 
@@ -213,7 +221,6 @@ export default function HomeScreen() {
     setEditingEntryId(entry.id);
     setEditingEntryText(entry.content);
   };
-
 
   /**
    * Callback function to handle adding an emoji to the input
@@ -236,6 +243,7 @@ export default function HomeScreen() {
     // Don't save if content hasn't changed
     if (originalEntry && trimmedText === originalEntry.content) {
       setEditingEntryId(null);
+      focusMainInput();
       return;
     }
 
@@ -247,6 +255,7 @@ export default function HomeScreen() {
         },
       });
       setEditingEntryId(null);
+      focusMainInput();
     } catch (error) {
       console.error('Error updating mood entry:', error);
     }
@@ -263,6 +272,7 @@ export default function HomeScreen() {
     const originalEntry = entries.find(e => e.id === editingEntryId);
     setEditingEntryText(originalEntry?.content ?? '');
     setEditingEntryId(null);
+    focusMainInput();
   };
 
   /**
@@ -275,6 +285,7 @@ export default function HomeScreen() {
           id: entryId,
         },
       });
+      focusMainInput();
     } catch (error) {
       console.error('Error deleting mood entry:', error);
     }
@@ -322,6 +333,7 @@ export default function HomeScreen() {
         />
 
         <MainInputBar
+          ref={mainInputRef}
           value={input}
           onChangeText={setInput}
           onSubmit={handleSend}
@@ -336,6 +348,7 @@ export default function HomeScreen() {
         <EmojiSelector
           onEmojiPress={handleAddEmoji}
           onEditingChange={setIsEditingEmojis}
+          onFinishEditing={focusMainInput}
           dimmed={isEditingMoodEntry}
         />
       </KeyboardAvoidingView>

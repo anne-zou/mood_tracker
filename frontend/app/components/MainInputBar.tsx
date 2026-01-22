@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../../styles/textStyles';
@@ -16,7 +17,7 @@ type MainInputBarProps = {
   dimmed?: boolean;
 };
 
-export default function MainInputBar({
+const MainInputBar = forwardRef<any, MainInputBarProps>(function MainInputBar({
   value,
   onChangeText,
   onSubmit,
@@ -27,10 +28,11 @@ export default function MainInputBar({
   inputBackgroundColor,
   inputTextColor,
   dimmed = false,
-}: MainInputBarProps) {
+}, ref) {
   return (
     <View style={[styles.inputBar, { backgroundColor }, dimmed && styles.dimmed]}>
       <TextInput
+        ref={ref}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -54,7 +56,9 @@ export default function MainInputBar({
       />
     </View>
   );
-}
+});
+
+export default MainInputBar;
 
 const styles = StyleSheet.create({
   inputBar: {

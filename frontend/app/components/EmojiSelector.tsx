@@ -7,6 +7,7 @@ import EmojiEditRow from './EmojiEditRow';
 type EmojiSelectorProps = {
   onEmojiPress: (emoji: string) => void;
   onEditingChange?: (isEditing: boolean) => void;
+  onFinishEditing?: () => void;
   dimmed?: boolean;
 };
 
@@ -20,6 +21,7 @@ const formatEmojiInput = (value: string) => sanitizeEmojis(value).join(' ');
 export default function EmojiSelector({
   onEmojiPress,
   onEditingChange,
+  onFinishEditing,
   dimmed = false,
 }: EmojiSelectorProps) {
   const [emojis, setEmojis] = useState(['🙂', '😩', '😠', '🥱']);
@@ -43,11 +45,13 @@ export default function EmojiSelector({
     const nextEmojis = sanitizeEmojis(emojiInput);
     setEmojis(nextEmojis);
     setIsEditingEmojis(false);
+    onFinishEditing?.();
   };
 
   const handleCancelEmojis = () => {
     setEmojiInput(emojis.join(' '));
     setIsEditingEmojis(false);
+    onFinishEditing?.();
   };
 
   return (
