@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../../styles/textStyles';
 
-type MoodInputBarProps = {
+type MainInputBarProps = {
   value: string;
   onChangeText: (text: string) => void;
   onSubmit: () => void;
@@ -14,7 +14,7 @@ type MoodInputBarProps = {
   inputTextColor: string;
 };
 
-export default function MoodInputBar({
+export default function MainInputBar({
   value,
   onChangeText,
   onSubmit,
@@ -24,8 +24,7 @@ export default function MoodInputBar({
   backgroundColor,
   inputBackgroundColor,
   inputTextColor,
-}: MoodInputBarProps) {
-
+}: MainInputBarProps) {
   return (
     <View style={[styles.inputBar, { backgroundColor }]}>
       <TextInput
@@ -53,7 +52,6 @@ export default function MoodInputBar({
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   inputBar: {

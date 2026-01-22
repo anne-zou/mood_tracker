@@ -12,8 +12,8 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../styles/textStyles';
 import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL, WHITE } from '../styles/colors';
 import EmojiRow from './components/EmojiRow';
-import MoodInputBar from './components/MoodInputBar';
-import MoodMessageList, { MoodEntry } from './components/MoodMessageList';
+import MainInputBar from './components/MainInputBar';
+import MessageList, { MessageEntry } from './components/MessageList';
 import { supabase } from '../lib/supabase';
 import {
   QUERY_MOOD_ENTRIES,
@@ -151,7 +151,7 @@ export default function HomeScreen() {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  const entries: MoodEntry[] = data?.queryMoodEntries?.map((entry: MoodEntryResponse) => ({
+  const entries: MessageEntry[] = data?.queryMoodEntries?.map((entry: MoodEntryResponse) => ({
     userId: entry.userId,
     id: entry.id,
     content: entry.content,
@@ -188,7 +188,7 @@ export default function HomeScreen() {
     setInput((prev) => (prev ? `${prev} ${emoji}` : emoji));
   };
 
-  const handleStartEditEntry = (entry: MoodEntry) => {
+  const handleStartEditEntry = (entry: MessageEntry) => {
     setEditingEntryId(entry.id);
     setEditingEntryText(entry.content);
   };
@@ -291,7 +291,7 @@ export default function HomeScreen() {
         style={styles.inner}
         behavior={Platform.select({ ios: 'padding', android: undefined })}
       >
-        <MoodMessageList
+        <MessageList
           entries={entries}
           emptyText="How are you feeling?"
           textColor={GRAY_TEXT}
@@ -304,7 +304,7 @@ export default function HomeScreen() {
           onDelete={handleDeleteEntry}
         />
 
-        <MoodInputBar
+        <MainInputBar
           value={input}
           onChangeText={setInput}
           onSubmit={handleSend}

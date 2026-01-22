@@ -53,7 +53,7 @@ The server auto-creates required database tables on startup via `ensureTables()`
 - `app/_layout.tsx` - Root layout with GestureHandler and PaperProvider setup
 - `app/index.tsx` - Auth landing page with Google OAuth
 - `app/home.tsx` - Main mood tracking screen
-- `app/components/` - Reusable components (EmojiRow, MoodInputBar, MoodMessageList)
+- `app/components/` - Reusable components (EmojiRow, MoodInputBar, MessageList)
 - `app/styles/` - Shared styles
 - `lib/supabase.ts` - Supabase client for frontend authentication
 

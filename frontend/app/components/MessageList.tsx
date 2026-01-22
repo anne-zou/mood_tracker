@@ -4,7 +4,7 @@ import { GRAY_TEXT, WHITE } from '../../styles/colors';
 import { RADIUS } from '../../styles/textStyles';
 import { fontConfig } from '../_layout';
 
-export type MoodEntry = {
+export type MessageEntry = {
   id: string;
   userId: string;
   content: string;
@@ -13,15 +13,15 @@ export type MoodEntry = {
   updatedAt: number;
 };
 
-type MoodMessageListProps = {
-  entries: MoodEntry[];
+type MessageListProps = {
+  entries: MessageEntry[];
   emptyText: string;
   textColor: string;
   textSize: number;
   editingId: string | null;
   editingText: string;
   onChangeEditingText: (value: string) => void;
-  onStartEdit: (entry: MoodEntry) => void;
+  onStartEdit: (entry: MessageEntry) => void;
   onSaveEdit: () => void;
   onDelete: (entryId: string) => void;
 };
@@ -38,7 +38,7 @@ const formatDayLabel = (timestamp: number) =>
     year: 'numeric',
   });
 
-export default function MoodMessageList({
+export default function MessageList({
   entries,
   emptyText,
   textColor,
@@ -49,7 +49,7 @@ export default function MoodMessageList({
   onStartEdit,
   onSaveEdit,
   onDelete,
-}: MoodMessageListProps) {
+}: MessageListProps) {
   return (
     <FlatList
       data={entries}
@@ -62,7 +62,7 @@ export default function MoodMessageList({
           !nextEntry || getDayKey(nextEntry.time) !== getDayKey(item.time);
 
         return (
-        <View style={styles.messageRow}>
+          <View style={styles.messageRow}>
             {showDateSeparator && (
               <View style={styles.dateSeparator}>
                 <View style={styles.dateSeparatorLine} />
@@ -70,63 +70,64 @@ export default function MoodMessageList({
                 <View style={styles.dateSeparatorLine} />
               </View>
             )}
-          <View style={styles.messageBubbleWrapper}>
-            <Surface style={styles.messageBubble} elevation={0}>
-              <Text style={[styles.messageText, { ...fontConfig, color: textColor, fontSize: textSize }]}>
-                {editingId === item.id ? editingText : item.content}
-              </Text>
-            </Surface>
-            {editingId === item.id && (
-              <RNTextInput
-                value={editingText}
-                onChangeText={onChangeEditingText}
-                autoFocus
-                selection={{ start: editingText.length, end: editingText.length }}
-                returnKeyType="done"
-                onSubmitEditing={onSaveEdit}
-                onBlur={onSaveEdit}
-                multiline
-                scrollEnabled={false}
-                style={[
-                  styles.editingInput,
-                  {
-                    ...fontConfig,
-                    fontSize: textSize,
-                    color: textColor,
-                  },
-                ]}
-              />
-            )}
-          </View>
-          <View style={styles.messageMetadata}>
-            <Text
-              variant="bodySmall"
-              numberOfLines={1}
-              ellipsizeMode="clip"
-              style={[styles.messageTime, { color: textColor }]}
-            >
-              {new Date(item.time).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </Text>
-            <View style={styles.messageActions}>
-              <IconButton
-                icon="pencil"
-                size={12}
-                iconColor={textColor}
-                onPress={() => onStartEdit(item)}
-                style={styles.actionButton}
-              />
-              <IconButton
-                icon="trash-can"
-                size={12}
-                iconColor={textColor}
-                onPress={() => onDelete(item.id)}
-                style={styles.actionButton}
-              />
+            <View style={styles.messageBubbleWrapper}>
+              <Surface style={styles.messageBubble} elevation={0}>
+                <Text style={[styles.messageText, { ...fontConfig, color: textColor, fontSize: textSize }]}>
+                  {editingId === item.id ? editingText : item.content}
+                </Text>
+              </Surface>
+              {editingId === item.id && (
+                <RNTextInput
+                  value={editingText}
+                  onChangeText={onChangeEditingText}
+                  autoFocus
+                  selection={{ start: editingText.length, end: editingText.length }}
+                  returnKeyType="done"
+                  onSubmitEditing={onSaveEdit}
+                  onBlur={onSaveEdit}
+                  multiline
+                  scrollEnabled={false}
+                  style={[
+                    styles.editingInput,
+                    {
+                      ...fontConfig,
+                      fontSize: textSize,
+                      color: textColor,
+                    },
+                  ]}
+                />
+              )}
             </View>
-          </View></View>
+            <View style={styles.messageMetadata}>
+              <Text
+                variant="bodySmall"
+                numberOfLines={1}
+                ellipsizeMode="clip"
+                style={[styles.messageTime, { color: textColor }]}
+              >
+                {new Date(item.time).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </Text>
+              <View style={styles.messageActions}>
+                <IconButton
+                  icon="pencil"
+                  size={12}
+                  iconColor={textColor}
+                  onPress={() => onStartEdit(item)}
+                  style={styles.actionButton}
+                />
+                <IconButton
+                  icon="trash-can"
+                  size={12}
+                  iconColor={textColor}
+                  onPress={() => onDelete(item.id)}
+                  style={styles.actionButton}
+                />
+              </View>
+            </View>
+          </View>
         );
       }}
       ListEmptyComponent={
