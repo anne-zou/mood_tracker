@@ -309,50 +309,52 @@ export default function HomeScreen() {
    */
   return (
     <SafeAreaView style={styles.container}>
-      <View style={[styles.header, isEditingAny && styles.dimmed]}>
-        <HamburgerMenu />
+      <View style={styles.content}>
+        <View style={[styles.header, isEditingAny && styles.dimmed]}>
+          <HamburgerMenu />
+        </View>
+
+        <KeyboardAvoidingView
+          style={styles.inner}
+          behavior={Platform.select({ ios: 'padding', android: undefined })}
+        >
+          <MessageList
+            entries={entries}
+            emptyText="How are you feeling?"
+            textColor={GRAY_TEXT}
+            textSize={baseTextSize}
+            editingId={editingEntryId}
+            editingText={editingEntryText}
+            onChangeEditingText={setEditingEntryText}
+            onStartEdit={handleStartEditEntry}
+            onSaveEdit={handleSaveEditEntry}
+            onCancelEdit={handleCancelEditEntry}
+            onDelete={handleDeleteEntry}
+            dimAll={isEditingEmojis}
+          />
+
+          <MainInputBar
+            ref={mainInputRef}
+            value={input}
+            onChangeText={setInput}
+            onSubmit={handleSend}
+            placeholder="Enter your mood..."
+            placeholderTextColor={GRAY_TEXT}
+            textSize={baseTextSize}
+            backgroundColor={SCREEN_BACKGROUND}
+            inputBackgroundColor={WHITE}
+            inputTextColor="#1f2933"
+            dimmed={isEditingAny}
+          />
+          <EmojiSelector
+            onEmojiPress={handleAddEmoji}
+            onEditingChange={setIsEditingEmojis}
+            onFinishEditing={focusMainInput}
+            enabled={!!userId}
+            dimmed={isEditingMoodEntry}
+          />
+        </KeyboardAvoidingView>
       </View>
-
-      <KeyboardAvoidingView
-        style={styles.inner}
-        behavior={Platform.select({ ios: 'padding', android: undefined })}
-      >
-        <MessageList
-          entries={entries}
-          emptyText="How are you feeling?"
-          textColor={GRAY_TEXT}
-          textSize={baseTextSize}
-          editingId={editingEntryId}
-          editingText={editingEntryText}
-          onChangeEditingText={setEditingEntryText}
-          onStartEdit={handleStartEditEntry}
-          onSaveEdit={handleSaveEditEntry}
-          onCancelEdit={handleCancelEditEntry}
-          onDelete={handleDeleteEntry}
-          dimAll={isEditingEmojis}
-        />
-
-        <MainInputBar
-          ref={mainInputRef}
-          value={input}
-          onChangeText={setInput}
-          onSubmit={handleSend}
-          placeholder="Enter your mood..."
-          placeholderTextColor={GRAY_TEXT}
-          textSize={baseTextSize}
-          backgroundColor={SCREEN_BACKGROUND}
-          inputBackgroundColor={WHITE}
-          inputTextColor="#1f2933"
-          dimmed={isEditingAny}
-        />
-        <EmojiSelector
-          onEmojiPress={handleAddEmoji}
-          onEditingChange={setIsEditingEmojis}
-          onFinishEditing={focusMainInput}
-          enabled={!!userId}
-          dimmed={isEditingMoodEntry}
-        />
-      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -361,6 +363,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: SCREEN_BACKGROUND,
+  },
+  content: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 2000,
+    alignSelf: 'center',
   },
   loadingContainer: {
     flex: 1,

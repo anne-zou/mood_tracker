@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet, View, Alert, Platform } from 'react-native';
-import { Image } from 'expo-image';
 import { Button, Text } from 'react-native-paper';
 import { useState, useEffect } from 'react';
 import * as WebBrowser from 'expo-web-browser';
@@ -79,11 +78,6 @@ export default function AuthLandingScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.inner}>
-        <Image
-          source={require('../assets/logo_vector.png')}
-          style={styles.logo}
-          contentFit="contain"
-        />
         <View style={styles.textContainer}>
           <Text variant="titleLarge" style={styles.title}>
             Welcome to Mood Logger!
@@ -116,12 +110,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     justifyContent: 'center',
   },
-  logo: {
-    height: 180,
-    width: 180,
-    alignSelf: 'center',
-    marginBottom: 32,
-  },
   textContainer: {
     marginBottom: 24,
   },
@@ -138,5 +126,7 @@ const styles = StyleSheet.create({
   },
   googleButton: {
     width: '100%',
+    maxWidth: 360,
+    alignSelf: 'center',
   },
 });
