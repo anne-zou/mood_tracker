@@ -23,11 +23,14 @@ export default function MessageBubble({
   onChangeEditingText,
   onSaveEdit,
 }: MessageBubbleProps) {
+  const rawText = isEditing ? editingText : content;
+  const displayText = rawText.endsWith('\n') ? `${rawText} ` : rawText;
+
   return (
     <View style={styles.container}>
       <Surface style={styles.bubble} elevation={0}>
         <Text style={[styles.text, { ...fontConfig, color: textColor, fontSize: textSize }]}>
-          {isEditing ? editingText : content}
+          {displayText}
         </Text>
       </Surface>
       {isEditing && (
