@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, TextInput, IconButton } from 'react-native-paper';
 import { GRAY_TEXT, WHITE } from '../../styles/colors';
@@ -8,6 +8,7 @@ import { createDimmedStyle } from '../../styles/dimming';
 
 type EmojiSelectorProps = {
   onEmojiPress: (emoji: string) => void;
+  onEditingChange?: (isEditing: boolean) => void;
   dimmed?: boolean;
 };
 
@@ -18,10 +19,19 @@ const sanitizeEmojis = (value: string) => {
 
 const formatEmojiInput = (value: string) => sanitizeEmojis(value).join(' ');
 
-export default function EmojiSelector({ onEmojiPress, dimmed = false }: EmojiSelectorProps) {
+export default function EmojiSelector({
+  onEmojiPress,
+  onEditingChange,
+  dimmed = false,
+}: EmojiSelectorProps) {
   const [emojis, setEmojis] = useState(['🙂', '😩', '😠', '🥱']);
   const [isEditingEmojis, setIsEditingEmojis] = useState(false);
   const [emojiInput, setEmojiInput] = useState(emojis.join(' '));
+  const inputRef = useRef<any>(null);
+
+  useEffect(() => {
+    onEditingChange?.(isEditingEmojis);
+  }, [isEditingEmojis, onEditingChange]);
 
   const handleEditEmojis = () => {
     setEmojiInput(emojis.join(' '));
@@ -38,11 +48,18 @@ export default function EmojiSelector({ onEmojiPress, dimmed = false }: EmojiSel
     setIsEditingEmojis(false);
   };
 
+  const handleBlur = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
   if (isEditingEmojis) {
     return (
       <View style={[styles.editRow, dimmed && styles.dimmed]}>
         <Text variant="bodyMedium" style={styles.editLabel}>Edit emojis:</Text>
         <TextInput
+          ref={inputRef}
           value={emojiInput}
           onChangeText={handleEmojiInputChange}
           mode="outlined"
@@ -56,6 +73,7 @@ export default function EmojiSelector({ onEmojiPress, dimmed = false }: EmojiSel
             colors: { outline: 'transparent', background: WHITE }
           }}
           contentStyle={{ fontSize: 15, color: '#1f2933' }}
+          onBlur={handleBlur}
         />
         <IconButton
           icon="check"

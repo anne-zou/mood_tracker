@@ -36,6 +36,7 @@ export default function HomeScreen() {
   const [input, setInput] = useState('');
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [editingEntryText, setEditingEntryText] = useState('');
+  const [isEditingEmojis, setIsEditingEmojis] = useState(false);
 
   /**
    * Check if user is authenticated and set the user ID
@@ -279,6 +280,9 @@ export default function HomeScreen() {
     }
   };
 
+  const isEditingMoodEntry = !!editingEntryId;
+  const isEditingAny = isEditingMoodEntry || isEditingEmojis;
+
   if (loading && !data) {
     return (
       <SafeAreaView style={styles.container}>
@@ -294,7 +298,7 @@ export default function HomeScreen() {
    */
   return (
     <SafeAreaView style={styles.container}>
-      <View style={[styles.header, !!editingEntryId && styles.dimmed]}>
+      <View style={[styles.header, isEditingAny && styles.dimmed]}>
         <HamburgerMenu />
       </View>
 
@@ -314,6 +318,7 @@ export default function HomeScreen() {
           onSaveEdit={handleSaveEditEntry}
           onCancelEdit={handleCancelEditEntry}
           onDelete={handleDeleteEntry}
+          dimAll={isEditingEmojis}
         />
 
         <MainInputBar
@@ -326,9 +331,13 @@ export default function HomeScreen() {
           backgroundColor={SCREEN_BACKGROUND}
           inputBackgroundColor={WHITE}
           inputTextColor="#1f2933"
-          dimmed={!!editingEntryId}
+          dimmed={isEditingAny}
         />
-        <EmojiSelector onEmojiPress={handleAddEmoji} dimmed={!!editingEntryId} />
+        <EmojiSelector
+          onEmojiPress={handleAddEmoji}
+          onEditingChange={setIsEditingEmojis}
+          dimmed={isEditingMoodEntry}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

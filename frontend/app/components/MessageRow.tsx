@@ -14,6 +14,7 @@ type MessageRowProps = {
   onSaveEdit: () => void;
   onCancelEdit: () => void;
   onDelete: (entryId: string) => void;
+  dimAll?: boolean;
 };
 
 export default function MessageRow({
@@ -27,9 +28,10 @@ export default function MessageRow({
   onSaveEdit,
   onCancelEdit,
   onDelete,
+  dimAll = false,
 }: MessageRowProps) {
-  const isEditing = editingId === item.id;
-  const isAnotherEditing = editingId !== null && !isEditing;
+  const isEditingThis = editingId === item.id;
+  const shouldDim = dimAll || (editingId !== null && !isEditingThis);
 
   return (
     <View style={styles.messageRow}>
@@ -37,21 +39,21 @@ export default function MessageRow({
         content={item.content}
         textColor={textColor}
         textSize={textSize}
-        isEditing={isEditing}
+        isEditing={isEditingThis}
         editingText={editingText}
         onChangeEditingText={onChangeEditingText}
         onSaveEdit={onSaveEdit}
-        dimmed={isAnotherEditing}
+        dimmed={shouldDim}
       />
       <MessageMetadata
         item={item}
         textColor={textColor}
-        isEditing={isEditing}
+        isEditing={isEditingThis}
         onStartEdit={onStartEdit}
         onSaveEdit={onSaveEdit}
         onCancelEdit={onCancelEdit}
         onDelete={onDelete}
-        dimmed={isAnotherEditing}
+        dimmed={shouldDim}
       />
     </View>
   );

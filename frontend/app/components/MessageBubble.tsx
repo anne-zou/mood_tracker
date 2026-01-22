@@ -40,6 +40,7 @@ export default function MessageBubble({
   };
 
   const rawText = isEditing ? editingText : content;
+  // If the text ends in a newline, add a space to render the new line in the bubble
   const displayText = rawText.endsWith('\n') ? `${rawText} ` : rawText;
 
   return (

@@ -25,6 +25,7 @@ type MessageListProps = {
   onSaveEdit: () => void;
   onCancelEdit: () => void;
   onDelete: (entryId: string) => void;
+  dimAll?: boolean;
 };
 
 const getDayKey = (timestamp: number) => {
@@ -44,6 +45,7 @@ export default function MessageList({
   onSaveEdit,
   onCancelEdit,
   onDelete,
+  dimAll = false,
 }: MessageListProps) {
   return (
     <FlatList
@@ -55,12 +57,11 @@ export default function MessageList({
         const nextEntry = entries[index + 1];
         const showDateSeparator =
           !nextEntry || getDayKey(nextEntry.time) !== getDayKey(item.time);
-        const isEditing = editingId === item.id;
-        const isAnotherEditing = editingId !== null && !isEditing;
+        const shouldDimSeparator = dimAll || (editingId !== null);
 
         return (
           <View style={styles.messageRowWrapper}>
-            {showDateSeparator && <DateSeparator timestamp={item.time} dimmed={isAnotherEditing} />}
+            {showDateSeparator && <DateSeparator timestamp={item.time} dimmed={shouldDimSeparator} />}
             <MessageRow
               item={item}
               textColor={textColor}
@@ -72,6 +73,7 @@ export default function MessageList({
               onSaveEdit={onSaveEdit}
               onCancelEdit={onCancelEdit}
               onDelete={onDelete}
+              dimAll={dimAll}
             />
           </View>
         );
