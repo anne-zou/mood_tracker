@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   messageBubble: {
     backgroundColor: WHITE,
     borderRadius: RADIUS,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 10,
   },
   editingInput: {
