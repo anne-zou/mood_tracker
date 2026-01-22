@@ -349,6 +349,7 @@ export default function HomeScreen() {
           onEmojiPress={handleAddEmoji}
           onEditingChange={setIsEditingEmojis}
           onFinishEditing={focusMainInput}
+          enabled={!!userId}
           dimmed={isEditingMoodEntry}
         />
       </KeyboardAvoidingView>

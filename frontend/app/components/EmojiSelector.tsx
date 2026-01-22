@@ -1,13 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GRAY_TEXT } from '../../styles/colors';
 import EmojiRow from './EmojiRow';
 import EmojiEditRow from './EmojiEditRow';
+import { useMutation, useQuery } from '@apollo/client/react';
+import {
+  QUERY_EMOJI_CONFIG,
+  UPSERT_EMOJI_CONFIG,
+  QueryEmojiConfigResponse,
+  UpsertEmojiConfigResponse,
+} from '../../lib/graphql/emojiConfigs';
 
 type EmojiSelectorProps = {
   onEmojiPress: (emoji: string) => void;
   onEditingChange?: (isEditing: boolean) => void;
   onFinishEditing?: () => void;
+  enabled?: boolean;
   dimmed?: boolean;
 };
 
@@ -17,16 +25,30 @@ const sanitizeEmojis = (value: string) => {
 };
 
 const formatEmojiInput = (value: string) => sanitizeEmojis(value).join(' ');
+const DEFAULT_EMOJIS = ['🙂', '😩', '😠', '🥱'];
 
 export default function EmojiSelector({
   onEmojiPress,
   onEditingChange,
   onFinishEditing,
+  enabled = true,
   dimmed = false,
 }: EmojiSelectorProps) {
-  const [emojis, setEmojis] = useState(['🙂', '😩', '😠', '🥱']);
   const [isEditingEmojis, setIsEditingEmojis] = useState(false);
-  const [emojiInput, setEmojiInput] = useState(emojis.join(' '));
+  const [emojiInput, setEmojiInput] = useState('');
+
+  const { data } = useQuery<QueryEmojiConfigResponse>(QUERY_EMOJI_CONFIG, {
+    skip: !enabled || typeof window === 'undefined',
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const [upsertEmojiConfig] = useMutation<UpsertEmojiConfigResponse>(UPSERT_EMOJI_CONFIG);
+
+  const emojis = useMemo(() => {
+    const content = data?.queryEmojiConfig?.content ?? '';
+    const parsed = sanitizeEmojis(content);
+    return parsed.length ? parsed : DEFAULT_EMOJIS;
+  }, [data?.queryEmojiConfig?.content]);
 
   useEffect(() => {
     onEditingChange?.(isEditingEmojis);
@@ -41,11 +63,38 @@ export default function EmojiSelector({
     setEmojiInput(formatEmojiInput(value));
   };
 
-  const handleSaveEmojis = () => {
-    const nextEmojis = sanitizeEmojis(emojiInput);
-    setEmojis(nextEmojis);
+  const handleSaveEmojis = async () => {
+    const sanitizedEmojiInput = sanitizeEmojis(emojiInput);
+    const nextContent = sanitizedEmojiInput.join('');
     setIsEditingEmojis(false);
     onFinishEditing?.();
+    const now = new Date().toISOString();
+    const optimisticConfig = {
+      __typename: 'EmojiConfig',
+      id: data?.queryEmojiConfig?.id ?? `temp-${Date.now()}`,
+      userId: data?.queryEmojiConfig?.userId ?? 'temp',
+      content: nextContent,
+      createdAt: data?.queryEmojiConfig?.createdAt ?? now,
+      updatedAt: now,
+    };
+    try {
+      await upsertEmojiConfig({
+        variables: { content: nextContent },
+        optimisticResponse: {
+          upsertEmojiConfig: optimisticConfig,
+        },
+        update: (cache, { data: mutationData }) => {
+          const updated = mutationData?.upsertEmojiConfig;
+          if (!updated) return;
+          cache.writeQuery({
+            query: QUERY_EMOJI_CONFIG,
+            data: { queryEmojiConfig: updated },
+          });
+        },
+      });
+    } catch (error) {
+      console.error('Error saving emoji config:', error);
+    }
   };
 
   const handleCancelEmojis = () => {
