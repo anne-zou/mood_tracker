@@ -2,6 +2,7 @@ import emojiRegex from 'emoji-regex';
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GRAY_TEXT } from '../../styles/colors';
+import { MOOD_INPUT_BAR_HEIGHT } from '../../styles/textStyles';
 import EmojiRow from './EmojiRow';
 import EmojiEditRow from './EmojiEditRow';
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -24,8 +25,6 @@ const sanitizeEmojis = (value: string) => {
   return value.match(emojiRegex()) ?? [];
 };
 
-const DEFAULT_EMOJIS = ['🙂', '😩', '😠', '🥱'];
-
 export default function EmojiSelector({
   onEmojiPress,
   onEditingChange,
@@ -44,9 +43,7 @@ export default function EmojiSelector({
   const [upsertEmojiConfig] = useMutation<UpsertEmojiConfigResponse>(UPSERT_EMOJI_CONFIG);
 
   const emojis = useMemo(() => {
-    const content = data?.queryEmojiConfig?.content ?? '';
-    const parsed = sanitizeEmojis(content);
-    return parsed.length ? parsed : DEFAULT_EMOJIS;
+    return sanitizeEmojis(data?.queryEmojiConfig?.content ?? '');
   }, [data?.queryEmojiConfig?.content]);
 
   useEffect(() => {
@@ -103,7 +100,7 @@ export default function EmojiSelector({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, emojis.length === 0 && styles.emptyContainer]}>
       {isEditingEmojis ? (
         <EmojiEditRow
           value={emojiInput}
@@ -118,6 +115,7 @@ export default function EmojiSelector({
           onEmojiPress={onEmojiPress}
           onActionPress={handleEditEmojis}
           actionIconColor={GRAY_TEXT}
+            hideAction={!data?.queryEmojiConfig}
           dimmed={dimmed}
         />
       )}
@@ -127,6 +125,9 @@ export default function EmojiSelector({
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 8,
+    paddingBottom: 12,
+  },
+  emptyContainer: {
+    minHeight: MOOD_INPUT_BAR_HEIGHT + 12,
   },
 });

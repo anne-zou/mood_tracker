@@ -323,6 +323,7 @@ export default function HomeScreen() {
             emptyText="How are you feeling?"
             textColor={GRAY_TEXT}
             textSize={baseTextSize}
+            showEmptyState={data?.queryMoodEntries === null}
             editingId={editingEntryId}
             editingText={editingEntryText}
             onChangeEditingText={setEditingEntryText}

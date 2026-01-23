@@ -18,6 +18,7 @@ type MessageListProps = {
   emptyText: string;
   textColor: string;
   textSize: number;
+  showEmptyState?: boolean;
   editingId: string | null;
   editingText: string;
   onChangeEditingText: (value: string) => void;
@@ -38,6 +39,7 @@ export default function MessageList({
   emptyText,
   textColor,
   textSize,
+  showEmptyState = true,
   editingId,
   editingText,
   onChangeEditingText,
@@ -79,11 +81,13 @@ export default function MessageList({
         );
       }}
       ListEmptyComponent={
-        <View style={styles.emptyState}>
-          <Text style={[styles.emptyText, { color: textColor, fontSize: textSize }]}>
-            {emptyText}
-          </Text>
-        </View>
+        showEmptyState ? (
+          <View style={styles.emptyState}>
+            <Text style={[styles.emptyText, { color: textColor, fontSize: textSize }]}>
+              {emptyText}
+            </Text>
+          </View>
+        ) : null
       }
     />
   );

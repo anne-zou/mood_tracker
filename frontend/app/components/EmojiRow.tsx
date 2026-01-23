@@ -9,6 +9,7 @@ type EmojiRowProps = {
   onEmojiPress: (emoji: string) => void;
   onActionPress: () => void;
   actionIconColor: string;
+  hideAction?: boolean;
   dimmed?: boolean;
 };
 
@@ -17,6 +18,7 @@ export default function EmojiRow({
   onEmojiPress,
   onActionPress,
   actionIconColor,
+  hideAction = false,
   dimmed = false,
 }: EmojiRowProps) {
   return (
@@ -26,13 +28,15 @@ export default function EmojiRow({
           <Text style={styles.emojiText}>{emoji}</Text>
         </Pressable>
       ))}
-      <IconButton
-        icon="pencil"
-        size={18}
-        iconColor={actionIconColor}
-        onPress={onActionPress}
-        style={styles.emojiAddButton}
-      />
+      {!hideAction && (
+        <IconButton
+          icon="pencil"
+          size={18}
+          iconColor={actionIconColor}
+          onPress={onActionPress}
+          style={styles.emojiAddButton}
+        />
+      )}
     </View>
   );
 }
@@ -45,7 +49,6 @@ const styles = StyleSheet.create({
 
     gap: 8,
     paddingHorizontal: 12,
-    paddingBottom: 12,
     elevation: 1,
   },
   emojiButton: {

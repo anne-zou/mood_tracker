@@ -71,5 +71,17 @@ const queryEmojiConfig = async (context) => {
     'SELECT * FROM emoji_configs WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 1',
     [context.userId]
   );
-  return result.rows[0] ? mapEmojiConfig(result.rows[0]) : null;
+  if (result.rows[0]) {
+    return mapEmojiConfig(result.rows[0]);
+  } else {
+    // If the user has no emoji config, return the default emojis
+    const now = new Date().toISOString();
+    return {
+      id: 'default',
+      userId: context.userId,
+      content: '🙂😩😠🥱',
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
 };

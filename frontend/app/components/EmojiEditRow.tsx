@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingHorizontal: 12,
-    paddingBottom: 12,
     elevation: 1,
   },
   editLabel: {

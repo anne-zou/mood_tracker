@@ -105,6 +105,34 @@ test('emojiConfigs CRUD flow', { skip: !hasDb }, async () => {
   assert.equal(secondUpsertResult.data.upsertEmojiConfig.content, '🙂🫠');
 });
 
+test('emojiConfigs returns defaults when missing', { skip: !hasDb }, async () => {
+  const userId = '456';
+  await db.query('DELETE FROM emoji_configs WHERE user_id = $1', [userId]);
+  await db.query('INSERT INTO users (id, email) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING', [
+    456,
+    'test-456@example.com',
+  ]);
+
+  const queryResult = await runGraphql(
+    `
+      query QueryEmojiConfig {
+        queryEmojiConfig {
+          id
+          userId
+          content
+        }
+      }
+    `,
+    null,
+    { db, userId }
+  );
+
+  assert.ok(!queryResult.errors);
+  assert.equal(queryResult.data.queryEmojiConfig.id, 'default');
+  assert.equal(queryResult.data.queryEmojiConfig.userId, userId);
+  assert.equal(queryResult.data.queryEmojiConfig.content, '🙂😩😠🥱');
+});
+
 test.after(async () => {
   if (db) {
     await db.end();
