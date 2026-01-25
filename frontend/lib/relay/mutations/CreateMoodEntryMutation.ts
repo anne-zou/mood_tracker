@@ -1,5 +1,6 @@
 import { graphql, commitMutation, ConnectionHandler } from 'react-relay';
 import { RelayEnvironment } from '../environment';
+import { MOOD_ENTRIES_CONNECTION } from '../connectionKeys';
 import type { CreateMoodEntryMutation as CreateMoodEntryMutationType } from '../../../__generated__/CreateMoodEntryMutation.graphql';
 
 const mutation = graphql`
@@ -43,7 +44,7 @@ export function createMoodEntry(
         const root = store.getRoot();
         const connection = ConnectionHandler.getConnection(
           root,
-          'home_moodEntries'
+          MOOD_ENTRIES_CONNECTION
         );
 
         if (connection) {
@@ -69,7 +70,7 @@ export function createMoodEntry(
         const root = store.getRoot();
         const connection = ConnectionHandler.getConnection(
           root,
-          'home_moodEntries'
+          MOOD_ENTRIES_CONNECTION
         );
 
         if (connection) {

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<88a31ebd5a4726ae0c1fd7c721f3be9a>>
+ * @generated SignedSource<<e3959e010e563ba2ad432e217d507eff>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,6 +11,7 @@
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type MessageMetadata_entry$data = {
+  readonly content: string;
   readonly id: string;
   readonly time: string;
   readonly " $fragmentType": "MessageMetadata_entry";
@@ -39,12 +40,19 @@ const node: ReaderFragment = {
       "kind": "ScalarField",
       "name": "time",
       "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "content",
+      "storageKey": null
     }
   ],
   "type": "MoodEntry",
   "abstractKey": null
 };
 
-(node as any).hash = "110848a02df5d3a6629a5d354be8123e";
+(node as any).hash = "d8992ef562bc1d15ea0bbf69c455fa80";
 
 export default node;

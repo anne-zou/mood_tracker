@@ -1,47 +1,25 @@
-import emojiRegex from 'emoji-regex';
-import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { graphql, useLazyLoadQuery } from 'react-relay';
-import { GRAY_TEXT } from '../../styles/colors';
 import { MOOD_INPUT_BAR_HEIGHT } from '../../styles/textStyles';
 import EmojiRow from './EmojiRow';
 import EmojiEditRow from './EmojiEditRow';
-import { upsertEmojiConfig } from '../../lib/relay/mutations/UpsertEmojiConfigMutation';
-import type { EmojiSelectorQuery } from '../__generated__/EmojiSelectorQuery.graphql';
-
-type EmojiSelectorProps = {
-  onEmojiPress: (emoji: string) => void;
-  onEditingChange?: (isEditing: boolean) => void;
-  onFinishEditing?: () => void;
-  enabled?: boolean;
-  dimmed?: boolean;
-};
-
-const sanitizeEmojis = (value: string) => {
-  return value.match(emojiRegex()) ?? [];
-};
+import type { EmojiSelectorQuery } from '../../__generated__/EmojiSelectorQuery.graphql';
+import { useAppContext } from '../context/AppContext';
+import { EDITING_EMOJI_SELECTOR_ID } from '../reducers/appReducer';
 
 const EmojiSelectorQueryGraphQL = graphql`
   query EmojiSelectorQuery {
     emojiConfig {
       id
-      userId
       content
-      createdAt
-      updatedAt
+      ...EmojiRow_emojiConfig
+      ...EmojiEditRow_emojiConfig
     }
   }
 `;
 
-export default function EmojiSelector({
-  onEmojiPress,
-  onEditingChange,
-  onFinishEditing,
-  enabled = true,
-  dimmed = false,
-}: EmojiSelectorProps) {
-  const [isEditingEmojis, setIsEditingEmojis] = useState(false);
-  const [emojiInput, setEmojiInput] = useState('');
+export default function EmojiSelector() {
+  const { state } = useAppContext();
 
   const data = useLazyLoadQuery<EmojiSelectorQuery>(
     EmojiSelectorQueryGraphQL,
@@ -49,60 +27,15 @@ export default function EmojiSelector({
     { fetchPolicy: 'store-and-network' }
   );
 
-  const emojis = useMemo(() => {
-    return sanitizeEmojis(data?.emojiConfig?.content ?? '');
-  }, [data?.emojiConfig?.content]);
-
-  useEffect(() => {
-    onEditingChange?.(isEditingEmojis);
-  }, [isEditingEmojis, onEditingChange]);
-
-  const handleEditEmojis = () => {
-    setEmojiInput(emojis.join(''));
-    setIsEditingEmojis(true);
-  };
-
-  const handleEmojiInputChange = (value: string) => {
-    setEmojiInput(value);
-  };
-
-  const handleSaveEmojis = async () => {
-    const sanitizedEmojiInput = sanitizeEmojis(emojiInput);
-    const nextContent = sanitizedEmojiInput.join('');
-    setIsEditingEmojis(false);
-    onFinishEditing?.();
-    try {
-      await upsertEmojiConfig(nextContent, data?.emojiConfig);
-    } catch (error) {
-      console.error('Error saving emoji config:', error);
-    }
-  };
-
-  const handleCancelEmojis = () => {
-    setEmojiInput(emojis.join(''));
-    setIsEditingEmojis(false);
-    onFinishEditing?.();
-  };
+  const isEditingEmojis = state.editingEntryId === EDITING_EMOJI_SELECTOR_ID;
+  const isEmpty = !data?.emojiConfig?.content;
 
   return (
-    <View style={[styles.container, emojis.length === 0 && styles.emptyContainer]}>
+    <View style={[styles.container, isEmpty && styles.emptyContainer]}>
       {isEditingEmojis ? (
-        <EmojiEditRow
-          value={emojiInput}
-          onChangeText={handleEmojiInputChange}
-          onSave={handleSaveEmojis}
-          onCancel={handleCancelEmojis}
-          dimmed={dimmed}
-        />
+        <EmojiEditRow emojiConfig={data?.emojiConfig ?? null} />
       ) : (
-        <EmojiRow
-          emojis={emojis}
-          onEmojiPress={onEmojiPress}
-          onActionPress={handleEditEmojis}
-          actionIconColor={GRAY_TEXT}
-            hideAction={!data?.emojiConfig}
-          dimmed={dimmed}
-        />
+        <EmojiRow emojiConfig={data?.emojiConfig ?? null} />
       )}
     </View>
   );

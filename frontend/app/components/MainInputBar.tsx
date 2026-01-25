@@ -1,46 +1,50 @@
-import { forwardRef } from 'react';
+import { forwardRef, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../../styles/textStyles';
 import { createDimmedStyle } from '../../styles/dimming';
+import { BASE_TEXT_SIZE, GRAY_TEXT, SCREEN_BACKGROUND, WHITE } from '../../styles/theme';
+import { useAppContext } from '../context/AppContext';
+import { createMoodEntry as createMoodEntryMutation } from '../../lib/relay/mutations/CreateMoodEntryMutation';
 
-type MainInputBarProps = {
-  value: string;
-  onChangeText: (text: string) => void;
-  onSubmit: () => void;
-  placeholder: string;
-  placeholderTextColor: string;
-  textSize: number;
-  backgroundColor: string;
-  inputBackgroundColor: string;
-  inputTextColor: string;
-  dimmed?: boolean;
-};
+const INPUT_TEXT_COLOR = '#1f2933';
 
-const MainInputBar = forwardRef<any, MainInputBarProps>(function MainInputBar({
-  value,
-  onChangeText,
-  onSubmit,
-  placeholder,
-  placeholderTextColor,
-  textSize,
-  backgroundColor,
-  inputBackgroundColor,
-  inputTextColor,
-  dimmed = false,
-}, ref) {
+const MainInputBar = forwardRef<any, {}>(function MainInputBar(_props, ref) {
+  const { state, dispatch } = useAppContext();
+  const isEditingAny = !!state.editingEntryId;
+
+  /**
+   * Handle main input submit to create a new mood entry
+   */
+  const handleSubmit = useCallback(async () => {
+    if (!state.userId) {
+      console.error('User not authenticated');
+    }
+    dispatch({ type: 'SUBMIT_MAIN_INPUT' });
+
+    // Don't call mutation if input is empty
+    const trimmed = state.mainInput.trim();
+    if (!trimmed) return;
+
+    try {
+      await createMoodEntryMutation(trimmed, new Date().toISOString());
+    } catch (error) {
+      console.error('Error creating mood entry:', error);
+    }
+  }, [dispatch, state.mainInput, state.userId]);
+
   return (
-    <View style={[styles.inputBar, { backgroundColor }, dimmed && styles.dimmed]}>
+    <View style={[styles.inputBar, isEditingAny && styles.dimmed]}>
       <TextInput
         ref={ref}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={placeholderTextColor}
+        value={state.mainInput}
+        onChangeText={(text) => dispatch({ type: 'SET_MAIN_INPUT', payload: text })}
+        placeholder="Enter your mood..."
+        placeholderTextColor={GRAY_TEXT}
         mode="outlined"
         dense
         returnKeyType="send"
-        onSubmitEditing={onSubmit}
+        onSubmitEditing={handleSubmit}
         // react-native-paper single-line TextInput ignores submitBehavior;
         // Keep blurOnSubmit to prevent unfocus on submit.
         blurOnSubmit={false}
@@ -48,11 +52,11 @@ const MainInputBar = forwardRef<any, MainInputBarProps>(function MainInputBar({
         outlineStyle={{ borderWidth: 0 }}
         theme={{
           roundness: RADIUS,
-          colors: { outline: 'transparent', background: inputBackgroundColor }
+          colors: { outline: 'transparent', background: WHITE }
         }}
         contentStyle={{
-          fontSize: textSize,
-          color: inputTextColor,
+          fontSize: BASE_TEXT_SIZE,
+          color: INPUT_TEXT_COLOR,
           paddingHorizontal: 16,
           paddingVertical: 10,
         }}
@@ -70,6 +74,7 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 12,
     elevation: 1,
+    backgroundColor: SCREEN_BACKGROUND
   },
   input: {
     flex: 1,

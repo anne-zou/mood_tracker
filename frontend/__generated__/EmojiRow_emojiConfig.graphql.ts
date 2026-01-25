@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1cc3b5acd5382410212bf462f706f13d>>
+ * @generated SignedSource<<e187fbf7664a23f484372d3a1964e6b6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,21 +10,21 @@
 
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type MessageBubble_entry$data = {
+export type EmojiRow_emojiConfig$data = {
   readonly content: string;
   readonly id: string;
-  readonly " $fragmentType": "MessageBubble_entry";
+  readonly " $fragmentType": "EmojiRow_emojiConfig";
 };
-export type MessageBubble_entry$key = {
-  readonly " $data"?: MessageBubble_entry$data;
-  readonly " $fragmentSpreads": FragmentRefs<"MessageBubble_entry">;
+export type EmojiRow_emojiConfig$key = {
+  readonly " $data"?: EmojiRow_emojiConfig$data;
+  readonly " $fragmentSpreads": FragmentRefs<"EmojiRow_emojiConfig">;
 };
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
-  "name": "MessageBubble_entry",
+  "name": "EmojiRow_emojiConfig",
   "selections": [
     {
       "alias": null,
@@ -41,10 +41,10 @@ const node: ReaderFragment = {
       "storageKey": null
     }
   ],
-  "type": "MoodEntry",
+  "type": "EmojiConfig",
   "abstractKey": null
 };
 
-(node as any).hash = "f7152b9dffd6eba89a66f3b47f5c68e2";
+(node as any).hash = "3658b8f5d40e4e4f17d2f694a70bcd4f";
 
 export default node;

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<95c3f4954f51d22a160f124e7a4d727f>>
+ * @generated SignedSource<<e101df989bc544fb517c2540390d6ccb>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,15 +10,15 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type homeScreenQuery$variables = {
+export type MessageListQuery$variables = {
   first: number;
 };
-export type homeScreenQuery$data = {
-  readonly " $fragmentSpreads": FragmentRefs<"home_moodEntries">;
+export type MessageListQuery$data = {
+  readonly " $fragmentSpreads": FragmentRefs<"MessageList_moodEntries">;
 };
-export type homeScreenQuery = {
-  response: homeScreenQuery$data;
-  variables: homeScreenQuery$variables;
+export type MessageListQuery = {
+  response: MessageListQuery$data;
+  variables: MessageListQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -41,12 +41,12 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "homeScreenQuery",
+    "name": "MessageListQuery",
     "selections": [
       {
         "args": (v1/*: any*/),
         "kind": "FragmentSpread",
-        "name": "home_moodEntries"
+        "name": "MessageList_moodEntries"
       }
     ],
     "type": "Query",
@@ -56,7 +56,7 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "homeScreenQuery",
+    "name": "MessageListQuery",
     "selections": [
       {
         "alias": null,
@@ -156,23 +156,23 @@ return {
         "args": (v1/*: any*/),
         "filters": null,
         "handle": "connection",
-        "key": "home_moodEntries",
+        "key": "MessageList_moodEntries",
         "kind": "LinkedHandle",
         "name": "moodEntries"
       }
     ]
   },
   "params": {
-    "cacheID": "0af288d08d6489a121de329e8983d7f4",
+    "cacheID": "a5e93cb807b24de2e47c581835004c77",
     "id": null,
     "metadata": {},
-    "name": "homeScreenQuery",
+    "name": "MessageListQuery",
     "operationKind": "query",
-    "text": "query homeScreenQuery(\n  $first: Int!\n) {\n  ...home_moodEntries_3ASum4\n}\n\nfragment MessageBubble_entry on MoodEntry {\n  id\n  content\n}\n\nfragment MessageMetadata_entry on MoodEntry {\n  id\n  time\n}\n\nfragment MessageRow_entry on MoodEntry {\n  id\n  ...MessageBubble_entry\n  ...MessageMetadata_entry\n}\n\nfragment home_moodEntries_3ASum4 on Query {\n  moodEntries(first: $first) {\n    edges {\n      node {\n        id\n        content\n        time\n        ...MessageRow_entry\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n"
+    "text": "query MessageListQuery(\n  $first: Int!\n) {\n  ...MessageList_moodEntries_3ASum4\n}\n\nfragment MessageBubble_entry on MoodEntry {\n  id\n  content\n}\n\nfragment MessageList_moodEntries_3ASum4 on Query {\n  moodEntries(first: $first) {\n    edges {\n      node {\n        id\n        content\n        time\n        ...MessageRow_entry\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n\nfragment MessageMetadata_entry on MoodEntry {\n  id\n  time\n  content\n}\n\nfragment MessageRow_entry on MoodEntry {\n  id\n  ...MessageBubble_entry\n  ...MessageMetadata_entry\n}\n"
   }
 };
 })();
 
-(node as any).hash = "c642e0545caafd720df98a03bb257b58";
+(node as any).hash = "3ab8b91e8ae380d88e66a36301e9429f";
 
 export default node;

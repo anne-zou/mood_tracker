@@ -6,8 +6,9 @@ import { PaperProvider, MD3LightTheme, configureFonts } from 'react-native-paper
 import { Platform } from 'react-native';
 import { RelayEnvironmentProvider } from 'react-relay';
 import { RelayEnvironment } from '../lib/relay/environment';
-import { DARK_NEUTRAL, SCREEN_BACKGROUND, GRAY_TEXT, WHITE } from '../styles/colors';
+import { DARK_NEUTRAL, SCREEN_BACKGROUND, GRAY_TEXT, WHITE } from '../styles/theme';
 import { RADIUS } from '../styles/textStyles';
+import { ContextProvider } from './context/AppContext';
 
 export const fontConfig = {
   fontFamily: Platform.select({
@@ -56,12 +57,14 @@ const theme = {
 export default function RootLayout() {
   return (
     <RelayEnvironmentProvider environment={RelayEnvironment}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <PaperProvider theme={theme}>
-          <Stack screenOptions={{ headerShown: false }} />
-          <StatusBar style="auto" />
-        </PaperProvider>
-      </GestureHandlerRootView>
+      <ContextProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <PaperProvider theme={theme}>
+            <Stack screenOptions={{ headerShown: false }} />
+            <StatusBar style="auto" />
+          </PaperProvider>
+        </GestureHandlerRootView>
+      </ContextProvider>
     </RelayEnvironmentProvider>
   );
 }

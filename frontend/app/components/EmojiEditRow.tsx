@@ -1,44 +1,90 @@
-import { useRef } from 'react';
+import emojiRegex from 'emoji-regex';
+import { useRef, useState, useMemo, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { IconButton, Text, TextInput } from 'react-native-paper';
-import { GRAY_TEXT, WHITE } from '../../styles/colors';
+import { graphql, useFragment } from 'react-relay';
+import { GRAY_TEXT, WHITE } from '../../styles/theme';
 import { MOOD_INPUT_BAR_HEIGHT, RADIUS } from '../../styles/textStyles';
-import { createDimmedStyle } from '../../styles/dimming';
+import { useAppContext } from '../context/AppContext';
+import { upsertEmojiConfig } from '../../lib/relay/mutations/UpsertEmojiConfigMutation';
+import type { EmojiEditRow_emojiConfig$key } from '../../__generated__/EmojiEditRow_emojiConfig.graphql';
 
-type EmojiEditRowProps = {
-  value: string;
-  onChangeText: (value: string) => void;
-  onSave: () => void;
-  onCancel: () => void;
-  dimmed?: boolean;
+const sanitizeEmojis = (value: string) => {
+  return value.match(emojiRegex()) ?? [];
 };
 
-export default function EmojiEditRow({
-  value,
-  onChangeText,
-  onSave,
-  onCancel,
-  dimmed = false,
-}: EmojiEditRowProps) {
+const EmojiEditRowFragment = graphql`
+  fragment EmojiEditRow_emojiConfig on EmojiConfig {
+    id
+    userId
+    content
+    createdAt
+    updatedAt
+  }
+`;
+
+type EmojiEditRowProps = {
+  emojiConfig: EmojiEditRow_emojiConfig$key | null;
+};
+
+export default function EmojiEditRow({ emojiConfig }: EmojiEditRowProps) {
+  const { dispatch } = useAppContext();
   const inputRef = useRef<any>(null);
 
+  const data = useFragment(EmojiEditRowFragment, emojiConfig);
+
+  const initialEmojis = useMemo(() => {
+    return sanitizeEmojis(data?.content ?? '').join('');
+  }, [data?.content]);
+
+  const [emojiInput, setEmojiInput] = useState(initialEmojis);
+
+  /**
+   * Focus the input when the component mounts
+   */
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  /**
+   * Prevent user from switching focus away from the input while editing
+   */
   const handleBlur = () => {
+    // Immediately refocus the input
     if (inputRef.current) {
       inputRef.current.focus();
     }
   };
 
+  const handleSave = async () => {
+    const sanitizedEmojiInput = sanitizeEmojis(emojiInput);
+    const nextContent = sanitizedEmojiInput.join('');
+    dispatch({ type: 'FINISH_EDIT_EMOJIS' });
+    try {
+      await upsertEmojiConfig(nextContent, data);
+    } catch (error) {
+      console.error('Error saving emoji config:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    setEmojiInput(initialEmojis);
+    dispatch({ type: 'FINISH_EDIT_EMOJIS' });
+  };
+
   return (
-    <View style={[styles.editRow, dimmed && styles.dimmed]}>
+    <View style={styles.editRow}>
       <Text variant="bodyMedium" style={styles.editLabel}>Edit emojis:</Text>
       <TextInput
         ref={inputRef}
-        value={value}
-        onChangeText={onChangeText}
+        value={emojiInput}
+        onChangeText={setEmojiInput}
         mode="outlined"
         dense
         returnKeyType="done"
-        onSubmitEditing={onSave}
+        onSubmitEditing={handleSave}
         style={styles.editInput}
         outlineStyle={{ borderWidth: 0 }}
         theme={{
@@ -52,14 +98,14 @@ export default function EmojiEditRow({
         icon="check"
         size={16}
         iconColor={GRAY_TEXT}
-        onPress={onSave}
+        onPress={handleSave}
         style={styles.saveButton}
       />
       <IconButton
         icon="close"
         size={16}
         iconColor={GRAY_TEXT}
-        onPress={onCancel}
+        onPress={handleCancel}
         style={styles.saveButton}
       />
     </View>
@@ -87,5 +133,4 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
   },
-  dimmed: createDimmedStyle(),
 });

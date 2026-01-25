@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Menu, IconButton } from 'react-native-paper';
-import { DARK_NEUTRAL } from '../../styles/colors';
+import { DARK_NEUTRAL } from '../../styles/theme';
 import { supabase } from '../../lib/supabase';
 
 export default function HamburgerMenu() {

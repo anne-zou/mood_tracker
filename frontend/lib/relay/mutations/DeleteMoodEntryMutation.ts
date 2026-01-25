@@ -1,5 +1,6 @@
 import { graphql, commitMutation, ConnectionHandler } from 'react-relay';
 import { RelayEnvironment } from '../environment';
+import { MOOD_ENTRIES_CONNECTION } from '../connectionKeys';
 import type { DeleteMoodEntryMutation as DeleteMoodEntryMutationType } from '../../../__generated__/DeleteMoodEntryMutation.graphql';
 
 const mutation = graphql`
@@ -27,7 +28,7 @@ export function deleteMoodEntry(id: string): Promise<DeleteMoodEntryMutationType
           const root = store.getRoot();
           const connection = ConnectionHandler.getConnection(
             root,
-            'home_moodEntries'
+            MOOD_ENTRIES_CONNECTION
           );
 
           if (connection) {
@@ -43,7 +44,7 @@ export function deleteMoodEntry(id: string): Promise<DeleteMoodEntryMutationType
         const root = store.getRoot();
         const connection = ConnectionHandler.getConnection(
           root,
-          'home_moodEntries'
+          MOOD_ENTRIES_CONNECTION
         );
 
         if (connection) {

@@ -2,21 +2,15 @@ import { useRef } from 'react';
 import { View, TextInput as RNTextInput, StyleSheet } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
 import { graphql, useFragment } from 'react-relay';
-import { WHITE, GRAY_TEXT } from '../../styles/colors';
+import { WHITE, GRAY_TEXT, BASE_TEXT_SIZE } from '../../styles/theme';
 import { RADIUS } from '../../styles/textStyles';
 import { fontConfig } from '../_layout';
 import { createDimmedStyle } from '../../styles/dimming';
-import type { MessageBubble_entry$key } from '../__generated__/MessageBubble_entry.graphql';
+import { useAppContext } from '../context/AppContext';
+import type { MessageBubble_entry$key } from '../../__generated__/MessageBubble_entry.graphql';
 
 type MessageBubbleProps = {
   entry: MessageBubble_entry$key;
-  textColor: string;
-  textSize: number;
-  isEditing: boolean;
-  editingText: string;
-  onChangeEditingText: (value: string) => void;
-  onSaveEdit: () => void;
-  dimmed?: boolean;
 };
 
 const MessageBubbleFragment = graphql`
@@ -28,19 +22,17 @@ const MessageBubbleFragment = graphql`
 
 export default function MessageBubble({
   entry,
-  textColor,
-  textSize,
-  isEditing,
-  editingText,
-  onChangeEditingText,
-  onSaveEdit,
-  dimmed = false,
 }: MessageBubbleProps) {
-  const { content: moodEntryContent } = useFragment(MessageBubbleFragment, entry);
+  const { state, dispatch } = useAppContext();
+  const data = useFragment(MessageBubbleFragment, entry);
   const inputRef = useRef<RNTextInput>(null);
 
+  const isEditing = state.editingEntryId === data.id;
+  const isEditingAny = state.editingEntryId !== null;
+  const shouldDim = !isEditing && isEditingAny;
+
   /**
-   * Do not allow user to switch focus away from the message input without saving
+   * Prevent user from switching focus away from the input while editing
    */
   const handleBlur = () => {
     // Immediately refocus the input
@@ -49,26 +41,31 @@ export default function MessageBubble({
     }
   };
 
-  const rawText = isEditing ? editingText : moodEntryContent;
+  const rawText = isEditing ? state.editingEntryText : data.content;
   // If the text ends in a newline, add a space to render the new line in the bubble
   const displayText = rawText.endsWith('\n') ? `${rawText} ` : rawText;
 
   return (
     <View style={styles.container}>
-      <Surface style={[styles.bubble, dimmed && styles.dimmed]} elevation={0}>
-        <Text style={[styles.text, { ...fontConfig, color: textColor, fontSize: textSize }]}>
+      {/* Message bubble displaying the entry text - 
+      During edit mode, this will be mounted behind the text input to configure the size 
+      of the container. The input will then match the size of the container. This synchronizes 
+      the size of the bubble and text, so that they do not appear to shift position when switching 
+      in and out of editing mode.
+      */}
+      <Surface style={[styles.bubble, shouldDim && styles.dimmed]} elevation={0}>
+        <Text style={[styles.text, { ...fontConfig, fontSize: BASE_TEXT_SIZE }]}>
           {displayText}
         </Text>
       </Surface>
+      {/* Message input - This will only be displayed when editing. */}
       {isEditing && (
         <RNTextInput
           ref={inputRef}
-          value={editingText}
-          onChangeText={onChangeEditingText}
+          value={state.editingEntryText}
+          onChangeText={(text) => dispatch({ type: 'SET_ENTRY_TEXT', payload: text })}
           autoFocus
-          selection={{ start: editingText.length, end: editingText.length }}
-          returnKeyType="done"
-          onSubmitEditing={onSaveEdit}
+          selection={{ start: state.editingEntryText.length, end: state.editingEntryText.length }}
           onBlur={handleBlur}
           multiline
           scrollEnabled={false}
@@ -76,8 +73,8 @@ export default function MessageBubble({
             styles.input,
             {
               ...fontConfig,
-              fontSize: textSize,
-              color: textColor,
+              fontSize: BASE_TEXT_SIZE,
+              color: GRAY_TEXT,
               backgroundColor: WHITE,
             },
           ]}
@@ -100,7 +97,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   input: {
-    position: 'absolute',
+    position: 'absolute', // float on top of the bubble
     top: 0,
     left: 0,
     width: '100%',
