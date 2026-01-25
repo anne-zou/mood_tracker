@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -8,29 +8,53 @@ import {
   View,
 } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
-import { useQuery, useMutation } from '@apollo/client/react';
+import { graphql, useLazyLoadQuery, usePaginationFragment } from 'react-relay';
 import { GRAY_TEXT, SCREEN_BACKGROUND, DARK_NEUTRAL, WHITE } from '../styles/colors';
 import { createDimmedStyle } from '../styles/dimming';
 import MainInputBar from './components/MainInputBar';
-import MessageList, { MoodEntry } from './components/MessageList';
+import MessageList from './components/MessageList';
 import HamburgerMenu from './components/HamburgerMenu';
 import EmojiSelector from './components/EmojiSelector';
 import { supabase } from '../lib/supabase';
-import {
-  QUERY_MOOD_ENTRIES,
-  CREATE_MOOD_ENTRY,
-  UPDATE_MOOD_ENTRY,
-  DELETE_MOOD_ENTRY,
-  MoodEntryResponse,
-  QueryMoodEntriesResponse,
-  CreateMoodEntryResponse,
-  UpdateMoodEntryResponse,
-  DeleteMoodEntryResponse,
-} from '../lib/graphql/moodEntries';
+import { createMoodEntry as createMoodEntryMutation } from '../lib/relay/mutations/CreateMoodEntryMutation';
+import { updateMoodEntry as updateMoodEntryMutation } from '../lib/relay/mutations/UpdateMoodEntryMutation';
+import { deleteMoodEntry as deleteMoodEntryMutation } from '../lib/relay/mutations/DeleteMoodEntryMutation';
+import type { homeScreenQuery } from './__generated__/homeScreenQuery.graphql';
 
 const baseTextSize = 15;
 
-export default function HomeScreen() {
+const HomeScreenQuery = graphql`
+  query homeScreenQuery($first: Int!) {
+    ...home_moodEntries @arguments(first: $first)
+  }
+`;
+
+const HomeScreenPaginationFragment = graphql`
+  fragment home_moodEntries on Query
+  @argumentDefinitions(
+    first: { type: "Int", defaultValue: 50 }
+    after: { type: "String" }
+  )
+  @refetchable(queryName: "home_moodEntriesPaginationQuery") {
+    moodEntries(first: $first, after: $after)
+      @connection(key: "home_moodEntries") {
+      edges {
+        node {
+          id
+          content
+          time
+          ...MessageRow_entry
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+function HomeScreenContent() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [input, setInput] = useState('');
@@ -38,6 +62,17 @@ export default function HomeScreen() {
   const [editingEntryText, setEditingEntryText] = useState('');
   const [isEditingEmojis, setIsEditingEmojis] = useState(false);
   const mainInputRef = useRef<any>(null);
+
+  const queryData = useLazyLoadQuery<homeScreenQuery>(
+    HomeScreenQuery,
+    { first: 50 }
+  );
+
+  const { data, loadNext, hasNext } = usePaginationFragment(
+    HomeScreenPaginationFragment,
+    queryData
+  );
+
   const focusMainInput = () => {
     requestAnimationFrame(() => {
       mainInputRef.current?.focus();
@@ -48,7 +83,6 @@ export default function HomeScreen() {
    * Check if user is authenticated and set the user ID
    */
   useEffect(() => {
-    // Check if user is authenticated
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         router.replace('/');
@@ -57,7 +91,6 @@ export default function HomeScreen() {
       }
     });
 
-    // Listen for auth state changes (e.g., sign out)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         router.replace('/');
@@ -71,173 +104,52 @@ export default function HomeScreen() {
   }, [router]);
 
   /**
-   * Query the mood entries
+   * Extract entries from Relay data
    */
-  const { data, loading, error } = useQuery<QueryMoodEntriesResponse>(QUERY_MOOD_ENTRIES, {
-    variables: { limit: 100 },
-    skip: !userId || typeof window === 'undefined',
-    errorPolicy: 'all',
-  });
-
-  /**
-   * Parse the mood entries into a list of MessageEntry objects 
-   */
-  const entries: MoodEntry[] = data?.queryMoodEntries?.map((entry: MoodEntryResponse) => ({
-    userId: entry.userId,
-    id: entry.id,
-    content: entry.content,
-    time: Number(entry.time),
-    createdAt: Number(entry.createdAt),
-    updatedAt: Number(entry.updatedAt),
-  })) || [];
-
-  /**
-   * Handle errors from the query
-   */
-  useEffect(() => {
-    if (error) {
-      console.error('GraphQL Error:', error);
-    }
-  }, [error]);
-
-  /**
-   * Mutation to create a new mood entry
-   */
-  const [createMoodEntry] = useMutation<CreateMoodEntryResponse>(CREATE_MOOD_ENTRY, {
-    optimisticResponse: (vars) => {
-      const now = Date.now().toString();
-      return {
-        createMoodEntry: {
-          __typename: 'MoodEntry',
-          id: `temp-${now}`,
-          userId: userId || '',
-          content: vars.content,
-          time: now,
-          createdAt: now,
-          updatedAt: now,
-        },
-      };
-    },
-    update(cache, { data }) {
-      const newEntry = data?.createMoodEntry;
-      if (!newEntry) return;
-
-      const existing = cache.readQuery<QueryMoodEntriesResponse>({
-        query: QUERY_MOOD_ENTRIES,
-        variables: { limit: 100 },
-      });
-
-      if (existing?.queryMoodEntries) {
-        cache.writeQuery({
-          query: QUERY_MOOD_ENTRIES,
-          variables: { limit: 100 },
-          data: {
-            queryMoodEntries: [newEntry, ...existing.queryMoodEntries],
-          },
-        });
-      }
-    },
-  });
-
-  /**
-   * Mutation to update a mood entry
-   */
-  const [updateMoodEntry] = useMutation<UpdateMoodEntryResponse>(UPDATE_MOOD_ENTRY, {
-    optimisticResponse: (vars) => {
-      const entry = entries.find(e => e.id === vars.id);
-      return {
-        updateMoodEntry: {
-          __typename: 'MoodEntry',
-          id: vars.id,
-          userId: userId || '',
-          content: vars.content || '',
-          time: entry?.time.toString() || new Date().toISOString(),
-          createdAt: entry?.createdAt.toString() || new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      };
-    },
-  });
-
-  /**
-   * Mutation to delete a mood entry
-   */
-  const [deleteMoodEntry] = useMutation<DeleteMoodEntryResponse>(DELETE_MOOD_ENTRY, {
-    optimisticResponse: (vars) => ({
-      deleteMoodEntry: {
-        __typename: 'DeleteResponse',
-        deleted: true,
-      },
-    }),
-    update(cache, { data }, { variables }) {
-      if (!data?.deleteMoodEntry?.deleted || !variables?.id) return;
-
-      const existing = cache.readQuery<QueryMoodEntriesResponse>({
-        query: QUERY_MOOD_ENTRIES,
-        variables: { limit: 100 },
-      });
-
-      if (existing?.queryMoodEntries) {
-        cache.writeQuery({
-          query: QUERY_MOOD_ENTRIES,
-          variables: { limit: 100 },
-          data: {
-            queryMoodEntries: existing.queryMoodEntries.filter(
-              (entry) => entry.id !== variables.id
-            ),
-          },
-        });
-      }
-    },
-  });
-
-  /**
-   * Callback function to handle creating a new mood entry
-   */
-  const handleSend = async () => {
-    const trimmed = input.trim();
-    setInput('');
-    if (!trimmed || !userId) {
-      return;
-    }
-    try {
-      await createMoodEntry({
-        variables: {
-          content: trimmed,
-          time: new Date().toISOString(),
-        },
-      });
-    } catch (error) {
-      console.error('Error creating mood entry:', error);
-    } finally {
-      focusMainInput();
-    }
-  };
-
-  /**
-   * Callback function to handle starting to edit an entry
-   */
-  const handleStartEditEntry = (entry: MoodEntry) => {
-    setEditingEntryId(entry.id);
-    setEditingEntryText(entry.content);
-  };
+  const entries = (data as any).moodEntries?.edges.map((edge: any) => edge.node) || [];
 
   /**
    * Callback function for pressing an emoji button to enter it into the main input
    */
   const handleAddEmoji = (emoji: string) => {
     setInput((prev) => (prev ? `${prev} ${emoji}` : emoji));
+    focusMainInput();
   };
 
   /**
-   * Callback function to handle saving an edited entry
+   * Callback function to handle creating a new mood entry
+   */
+  const handleMainInputSubmit = async () => {
+    const trimmed = input.trim();
+    setInput('');
+    focusMainInput();
+    if (!trimmed || !userId) {
+      return;
+    }
+    try {
+      await createMoodEntryMutation(trimmed, new Date().toISOString());
+    } catch (error) {
+      console.error('Error creating mood entry:', error);
+    }
+  };
+
+  /**
+   * Callback function to handle starting to edit an entry
+   */
+  const handleStartEditEntry = (entryId: string, content: string) => {
+    setEditingEntryId(entryId);
+    setEditingEntryText(content);
+  };
+
+  /**
+   * Callback function to handle saving an entry after editing
    */
   const handleSaveEditEntry = async () => {
     if (!editingEntryId) {
       return;
     }
 
-    const originalEntry = entries.find(e => e.id === editingEntryId);
+    const originalEntry = entries.find((e: any) => e.id === editingEntryId);
     const trimmedText = editingEntryText.trim();
 
     // Don't save if content hasn't changed
@@ -248,12 +160,7 @@ export default function HomeScreen() {
     }
 
     try {
-      await updateMoodEntry({
-        variables: {
-          id: editingEntryId,
-          content: trimmedText,
-        },
-      });
+      await updateMoodEntryMutation(editingEntryId, trimmedText, originalEntry?.time);
       setEditingEntryId(null);
       focusMainInput();
     } catch (error) {
@@ -269,7 +176,7 @@ export default function HomeScreen() {
       return;
     }
 
-    const originalEntry = entries.find(e => e.id === editingEntryId);
+    const originalEntry = entries.find((e: any) => e.id === editingEntryId);
     setEditingEntryText(originalEntry?.content ?? '');
     setEditingEntryId(null);
     focusMainInput();
@@ -280,12 +187,8 @@ export default function HomeScreen() {
    */
   const handleDeleteEntry = async (entryId: string) => {
     try {
-      await deleteMoodEntry({
-        variables: {
-          id: entryId,
-        },
-      });
       focusMainInput();
+      await deleteMoodEntryMutation(entryId);
     } catch (error) {
       console.error('Error deleting mood entry:', error);
     }
@@ -293,16 +196,6 @@ export default function HomeScreen() {
 
   const isEditingMoodEntry = !!editingEntryId;
   const isEditingAny = isEditingMoodEntry || isEditingEmojis;
-
-  if (loading && !data) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={DARK_NEUTRAL} />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   /**
    * Render the home screen
@@ -323,7 +216,7 @@ export default function HomeScreen() {
             emptyText="How are you feeling?"
             textColor={GRAY_TEXT}
             textSize={baseTextSize}
-            showEmptyState={data?.queryMoodEntries === null}
+            showEmptyState={entries.length === 0}
             editingId={editingEntryId}
             editingText={editingEntryText}
             onChangeEditingText={setEditingEntryText}
@@ -338,7 +231,7 @@ export default function HomeScreen() {
             ref={mainInputRef}
             value={input}
             onChangeText={setInput}
-            onSubmit={handleSend}
+            onSubmit={handleMainInputSubmit}
             placeholder="Enter your mood..."
             placeholderTextColor={GRAY_TEXT}
             textSize={baseTextSize}
@@ -357,6 +250,20 @@ export default function HomeScreen() {
         </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
+  );
+}
+
+export default function HomeScreen() {
+  return (
+    <Suspense fallback={
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={DARK_NEUTRAL} />
+        </View>
+      </SafeAreaView>
+    }>
+      <HomeScreenContent />
+    </Suspense>
   );
 }
 

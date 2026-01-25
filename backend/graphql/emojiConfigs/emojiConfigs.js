@@ -1,5 +1,10 @@
 import emojiRegex from 'emoji-regex';
 
+export const DEFAULT_EMOJI_CONFIG = {
+  id: 'default',
+  content: '🙂😩😠🥱',
+};
+
 const mapEmojiConfig = (row) => ({
   id: row.id,
   userId: row.user_id,
@@ -27,23 +32,36 @@ export const emojiConfigTypeDefs = `
 `;
 
 export const emojiConfigQueryFields = `
-  queryEmojiConfig: EmojiConfig
+  emojiConfig: EmojiConfig
 `;
 
 export const emojiConfigMutationFields = `
-  upsertEmojiConfig(content: String!): EmojiConfig!
+  upsertEmojiConfig(input: UpsertEmojiConfigInput!): UpsertEmojiConfigPayload!
+`;
+
+export const emojiConfigInputTypes = `
+  input UpsertEmojiConfigInput {
+    content: String!
+    clientMutationId: String
+  }
+
+  type UpsertEmojiConfigPayload {
+    emojiConfig: EmojiConfig!
+    clientMutationId: String
+  }
 `;
 
 export const createEmojiConfigResolvers = () => ({
   upsertEmojiConfig: (args, context) => upsertEmojiConfig(args, context),
-  queryEmojiConfig: (_args, context) => queryEmojiConfig(context),
+  emojiConfig: (_args, context) => emojiConfig(context),
 });
 
-const upsertEmojiConfig = async ({ content }, context) => {
+const upsertEmojiConfig = async ({ input }, context) => {
   const db = context?.db;
   if (!context?.userId) {
     throw new Error('Authentication required');
   }
+  const { content, clientMutationId } = input;
   const sanitizedContent = sanitizeEmojiContent(content);
   const result = await db.query(
     `
@@ -57,11 +75,14 @@ const upsertEmojiConfig = async ({ content }, context) => {
     `,
     [context.userId, sanitizedContent]
   );
-  return mapEmojiConfig(result.rows[0]);
+  return {
+    emojiConfig: mapEmojiConfig(result.rows[0]),
+    clientMutationId,
+  };
 };
 
 
-const queryEmojiConfig = async (context) => {
+const emojiConfig = async (context) => {
   const db = context?.db;
   if (!context?.userId) {
     throw new Error('Authentication required');
@@ -77,9 +98,9 @@ const queryEmojiConfig = async (context) => {
     // If the user has no emoji config, return the default emojis
     const now = new Date().toISOString();
     return {
-      id: 'default',
+      id: DEFAULT_EMOJI_CONFIG.id,
       userId: context.userId,
-      content: '🙂😩😠🥱',
+      content: DEFAULT_EMOJI_CONFIG.content,
       createdAt: now,
       updatedAt: now,
     };

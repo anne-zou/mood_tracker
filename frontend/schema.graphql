@@ -1,0 +1,98 @@
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type MoodEntry implements Node {
+  id: ID!
+  userId: ID!
+  content: String!
+  time: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MoodEntryEdge {
+  cursor: String!
+  node: MoodEntry!
+}
+
+type MoodEntryConnection {
+  edges: [MoodEntryEdge!]!
+  pageInfo: PageInfo!
+}
+
+input CreateMoodEntryInput {
+  content: String!
+  time: String!
+  clientMutationId: String
+}
+
+input UpdateMoodEntryInput {
+  id: ID!
+  content: String
+  time: String
+  clientMutationId: String
+}
+
+input DeleteMoodEntryInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type CreateMoodEntryPayload {
+  moodEntryEdge: MoodEntryEdge!
+  clientMutationId: String
+}
+
+type UpdateMoodEntryPayload {
+  moodEntry: MoodEntry!
+  clientMutationId: String
+}
+
+type DeleteMoodEntryPayload {
+  deletedId: ID!
+  clientMutationId: String
+}
+
+type EmojiConfig {
+  id: ID!
+  userId: ID!
+  content: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input UpsertEmojiConfigInput {
+  content: String!
+  clientMutationId: String
+}
+
+type UpsertEmojiConfigPayload {
+  emojiConfig: EmojiConfig!
+  clientMutationId: String
+}
+
+type DeleteResponse {
+  deleted: Boolean!
+}
+
+type Query {
+  health: String!
+  node(id: ID!): Node
+  moodEntries(first: Int, after: String, last: Int, before: String): MoodEntryConnection!
+  emojiConfig: EmojiConfig
+}
+
+type Mutation {
+  createMoodEntry(input: CreateMoodEntryInput!): CreateMoodEntryPayload!
+  updateMoodEntry(input: UpdateMoodEntryInput!): UpdateMoodEntryPayload!
+  deleteMoodEntry(input: DeleteMoodEntryInput!): DeleteMoodEntryPayload!
+  upsertEmojiConfig(input: UpsertEmojiConfigInput!): UpsertEmojiConfigPayload!
+}

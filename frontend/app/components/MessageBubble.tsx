@@ -1,13 +1,15 @@
 import { useRef } from 'react';
 import { View, TextInput as RNTextInput, StyleSheet } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
+import { graphql, useFragment } from 'react-relay';
 import { WHITE, GRAY_TEXT } from '../../styles/colors';
 import { RADIUS } from '../../styles/textStyles';
 import { fontConfig } from '../_layout';
 import { createDimmedStyle } from '../../styles/dimming';
+import type { MessageBubble_entry$key } from '../__generated__/MessageBubble_entry.graphql';
 
 type MessageBubbleProps = {
-  content: string;
+  entry: MessageBubble_entry$key;
   textColor: string;
   textSize: number;
   isEditing: boolean;
@@ -17,8 +19,15 @@ type MessageBubbleProps = {
   dimmed?: boolean;
 };
 
+const MessageBubbleFragment = graphql`
+  fragment MessageBubble_entry on MoodEntry {
+    id
+    content
+  }
+`;
+
 export default function MessageBubble({
-  content,
+  entry,
   textColor,
   textSize,
   isEditing,
@@ -27,6 +36,7 @@ export default function MessageBubble({
   onSaveEdit,
   dimmed = false,
 }: MessageBubbleProps) {
+  const { content: moodEntryContent } = useFragment(MessageBubbleFragment, entry);
   const inputRef = useRef<RNTextInput>(null);
 
   /**
@@ -39,7 +49,7 @@ export default function MessageBubble({
     }
   };
 
-  const rawText = isEditing ? editingText : content;
+  const rawText = isEditing ? editingText : moodEntryContent;
   // If the text ends in a newline, add a space to render the new line in the bubble
   const displayText = rawText.endsWith('\n') ? `${rawText} ` : rawText;
 

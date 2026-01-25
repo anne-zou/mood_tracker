@@ -8,7 +8,8 @@
     "start": "node --import dotenv/config server.js",
     "test": "node --test --import dotenv/config",
     "test:emojiConfigs": "node --test --import dotenv/config graphql/emojiConfigs/emojiConfigs.test.js",
-    "test:moodEntries": "node --test --import dotenv/config graphql/moodEntries/moodEntries.test.js"
+    "test:moodEntries": "node --test --import dotenv/config graphql/moodEntries/moodEntries.test.js",
+    "schema:export": "node scripts/exportSchema.js"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,7 @@
     "express": "^5.2.1",
     "graphql": "^16.11.0",
     "graphql-http": "^1.22.4",
+    "graphql-relay": "^0.10.2",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1"
   }

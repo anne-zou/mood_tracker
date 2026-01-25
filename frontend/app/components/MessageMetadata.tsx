@@ -1,22 +1,30 @@
 import { View, StyleSheet } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
+import { graphql, useFragment } from 'react-relay';
 import { GRAY_TEXT } from '../../styles/colors';
-import { MoodEntry } from './MessageList';
 import { createDimmedStyle } from '../../styles/dimming';
+import type { MessageMetadata_entry$key } from '../__generated__/MessageMetadata_entry.graphql';
 
 type MessageMetadataProps = {
-  item: MoodEntry;
+  entry: MessageMetadata_entry$key;
   textColor: string;
   isEditing: boolean;
-  onStartEdit: (entry: MoodEntry) => void;
+  onStartEdit: () => void;
   onSaveEdit: () => void;
   onCancelEdit: () => void;
-  onDelete: (entryId: string) => void;
+  onDelete: () => void;
   dimmed?: boolean;
 };
 
+const MessageMetadataFragment = graphql`
+  fragment MessageMetadata_entry on MoodEntry {
+    id
+    time
+  }
+`;
+
 export default function MessageMetadata({
-  item,
+  entry,
   textColor,
   isEditing,
   onStartEdit,
@@ -25,6 +33,7 @@ export default function MessageMetadata({
   onDelete,
   dimmed = false,
 }: MessageMetadataProps) {
+  const { time: moodEntryTime } = useFragment(MessageMetadataFragment, entry);
   return (
     <View style={[styles.container, dimmed && styles.dimmed]}>
       <Text
@@ -33,7 +42,7 @@ export default function MessageMetadata({
         ellipsizeMode="clip"
         style={[styles.time, { color: textColor }]}
       >
-        {new Date(item.time).toLocaleTimeString([], {
+        {new Date(moodEntryTime).toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit'
         })}
@@ -62,14 +71,14 @@ export default function MessageMetadata({
               icon="pencil"
               size={12}
               iconColor={textColor}
-              onPress={() => onStartEdit(item)}
+                onPress={onStartEdit}
               style={styles.actionButton}
             />
             <IconButton
               icon="trash-can"
               size={12}
               iconColor={textColor}
-              onPress={() => onDelete(item.id)}
+                onPress={onDelete}
               style={styles.actionButton}
             />
           </>

@@ -10,11 +10,26 @@ import {
   emojiConfigMutationFields,
   emojiConfigQueryFields,
   emojiConfigTypeDefs,
+  emojiConfigInputTypes,
 } from './emojiConfigs/emojiConfigs.js';
 
 export const schema = buildSchema(`
+  # Relay Node interface
+  interface Node {
+    id: ID!
+  }
+
+  # Relay PageInfo type for pagination
+  type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String
+    endCursor: String
+  }
+
   ${moodEntryTypeDefs}
   ${emojiConfigTypeDefs}
+  ${emojiConfigInputTypes}
 
   type DeleteResponse {
     deleted: Boolean!
@@ -22,6 +37,8 @@ export const schema = buildSchema(`
 
   type Query {
     health: String!
+    # Relay node query for fetching objects by global ID
+    node(id: ID!): Node
     ${moodEntryQueryFields}
     ${emojiConfigQueryFields}
   }

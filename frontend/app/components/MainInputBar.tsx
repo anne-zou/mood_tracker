@@ -41,6 +41,9 @@ const MainInputBar = forwardRef<any, MainInputBarProps>(function MainInputBar({
         dense
         returnKeyType="send"
         onSubmitEditing={onSubmit}
+        // react-native-paper single-line TextInput ignores submitBehavior;
+        // Keep blurOnSubmit to prevent unfocus on submit.
+        blurOnSubmit={false}
         style={styles.input}
         outlineStyle={{ borderWidth: 0 }}
         theme={{

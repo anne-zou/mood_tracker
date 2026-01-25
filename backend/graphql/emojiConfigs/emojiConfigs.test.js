@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import { graphql } from 'graphql';
 import { createRootResolvers, schema } from '../schema.js';
+import { DEFAULT_EMOJI_CONFIG } from './emojiConfigs.js';
 
 const { Pool } = pg;
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -33,8 +34,8 @@ const runGraphql = async (source, variableValues, contextValue) =>
 test('emojiConfigs rejects unauthenticated access', { skip: !hasDb }, async () => {
   const result = await runGraphql(
     `
-      query QueryEmojiConfig {
-        queryEmojiConfig {
+      query EmojiConfig {
+        emojiConfig {
           id
         }
       }
@@ -54,28 +55,31 @@ test('emojiConfigs CRUD flow', { skip: !hasDb }, async () => {
   /* Upsert a config */
   const upsertResult = await runGraphql(
     `
-      mutation UpsertEmojiConfig($content: String!) {
-        upsertEmojiConfig(content: $content) {
-          id
-          content
+      mutation UpsertEmojiConfig($input: UpsertEmojiConfigInput!) {
+        upsertEmojiConfig(input: $input) {
+          emojiConfig {
+            id
+            content
+          }
+          clientMutationId
         }
       }
     `,
-    { content: '🙂 😩 😠' },
+    { input: { content: '🙂 😩 😠' } },
     { db, userId }
   );
   if (upsertResult.errors?.length) {
     console.error('upsertEmojiConfig errors:', upsertResult.errors);
   }
   assert.ok(!upsertResult.errors);
-  assert.equal(upsertResult.data.upsertEmojiConfig.content, '🙂😩😠');
-  const configId = upsertResult.data.upsertEmojiConfig.id;
+  assert.equal(upsertResult.data.upsertEmojiConfig.emojiConfig.content, '🙂😩😠');
+  const configId = upsertResult.data.upsertEmojiConfig.emojiConfig.id;
 
   /* Query the config */
   const queryResult = await runGraphql(
     `
-      query QueryEmojiConfig {
-        queryEmojiConfig {
+      query EmojiConfig {
+        emojiConfig {
           id
           content
         }
@@ -85,24 +89,27 @@ test('emojiConfigs CRUD flow', { skip: !hasDb }, async () => {
     { db, userId }
   );
   assert.ok(!queryResult.errors);
-  assert.ok(queryResult.data.queryEmojiConfig);
+  assert.ok(queryResult.data.emojiConfig);
 
   /* Upsert an existing config for the same user */
   const secondUpsertResult = await runGraphql(
     `
-      mutation UpsertEmojiConfig($content: String!) {
-        upsertEmojiConfig(content: $content) {
-          id
-          content
+      mutation UpsertEmojiConfig($input: UpsertEmojiConfigInput!) {
+        upsertEmojiConfig(input: $input) {
+          emojiConfig {
+            id
+            content
+          }
+          clientMutationId
         }
       }
     `,
-    { content: '🙂 🫠' },
+    { input: { content: '🙂 🫠' } },
     { db, userId }
   );
   assert.ok(!secondUpsertResult.errors);
-  assert.equal(secondUpsertResult.data.upsertEmojiConfig.id, configId);
-  assert.equal(secondUpsertResult.data.upsertEmojiConfig.content, '🙂🫠');
+  assert.equal(secondUpsertResult.data.upsertEmojiConfig.emojiConfig.id, configId);
+  assert.equal(secondUpsertResult.data.upsertEmojiConfig.emojiConfig.content, '🙂🫠');
 });
 
 test('emojiConfigs returns defaults when missing', { skip: !hasDb }, async () => {
@@ -115,8 +122,8 @@ test('emojiConfigs returns defaults when missing', { skip: !hasDb }, async () =>
 
   const queryResult = await runGraphql(
     `
-      query QueryEmojiConfig {
-        queryEmojiConfig {
+      query EmojiConfig {
+        emojiConfig {
           id
           userId
           content
@@ -128,9 +135,9 @@ test('emojiConfigs returns defaults when missing', { skip: !hasDb }, async () =>
   );
 
   assert.ok(!queryResult.errors);
-  assert.equal(queryResult.data.queryEmojiConfig.id, 'default');
-  assert.equal(queryResult.data.queryEmojiConfig.userId, userId);
-  assert.equal(queryResult.data.queryEmojiConfig.content, '🙂😩😠🥱');
+  assert.equal(queryResult.data.emojiConfig.id, DEFAULT_EMOJI_CONFIG.id);
+  assert.equal(queryResult.data.emojiConfig.userId, userId);
+  assert.equal(queryResult.data.emojiConfig.content, DEFAULT_EMOJI_CONFIG.content);
 });
 
 test.after(async () => {

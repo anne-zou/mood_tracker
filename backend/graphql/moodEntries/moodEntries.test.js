@@ -34,8 +34,12 @@ test('moodEntries rejects unauthenticated access', { skip: !hasDb }, async () =>
   const result = await runGraphql(
     `
       query QueryMoodEntries {
-        queryMoodEntries {
-          id
+        moodEntries(first: 10) {
+          edges {
+            node {
+              id
+            }
+          }
         }
       }
     `,
@@ -55,30 +59,39 @@ test('moodEntries CRUD flow', { skip: !hasDb }, async () => {
   /* Create a mood entry */
   const createResult = await runGraphql(
     `
-      mutation CreateMoodEntry($content: String!, $time: String!) {
-        createMoodEntry(content: $content, time: $time) {
-          id
-          content
+      mutation CreateMoodEntry($input: CreateMoodEntryInput!) {
+        createMoodEntry(input: $input) {
+          moodEntryEdge {
+            node {
+              id
+              content
+            }
+          }
+          clientMutationId
         }
       }
     `,
-    { content: 'hello', time: now },
+    { input: { content: 'hello', time: now } },
     { db, userId }
   );
   if (createResult.errors?.length) {
     console.error('createMoodEntry errors:', createResult.errors);
   }
   assert.ok(!createResult.errors);
-  assert.equal(createResult.data.createMoodEntry.content, 'hello');
-  const entryId = createResult.data.createMoodEntry.id;
+  assert.equal(createResult.data.createMoodEntry.moodEntryEdge.node.content, 'hello');
+  const entryId = createResult.data.createMoodEntry.moodEntryEdge.node.id;
 
   /* Query the mood entry */
   const queryResult = await runGraphql(
     `
       query QueryMoodEntries {
-        queryMoodEntries {
-          id
-          content
+        moodEntries(first: 10) {
+          edges {
+            node {
+              id
+              content
+            }
+          }
         }
       }
     `,
@@ -86,38 +99,42 @@ test('moodEntries CRUD flow', { skip: !hasDb }, async () => {
     { db, userId }
   );
   assert.ok(!queryResult.errors);
-  assert.equal(queryResult.data.queryMoodEntries.length, 1);
+  assert.equal(queryResult.data.moodEntries.edges.length, 1);
 
   /* Update the mood entry */
   const updateResult = await runGraphql(
     `
-      mutation UpdateMoodEntry($id: ID!, $content: String!) {
-        updateMoodEntry(id: $id, content: $content) {
-          id
-          content
+      mutation UpdateMoodEntry($input: UpdateMoodEntryInput!) {
+        updateMoodEntry(input: $input) {
+          moodEntry {
+            id
+            content
+          }
+          clientMutationId
         }
       }
     `,
-    { id: entryId, content: 'updated' },
+    { input: { id: entryId, content: 'updated' } },
     { db, userId }
   );
   assert.ok(!updateResult.errors);
-  assert.equal(updateResult.data.updateMoodEntry.content, 'updated');
+  assert.equal(updateResult.data.updateMoodEntry.moodEntry.content, 'updated');
 
   /* Delete the mood entry */
   const deleteResult = await runGraphql(
     `
-      mutation DeleteMoodEntry($id: ID!) {
-        deleteMoodEntry(id: $id) {
-          deleted
+      mutation DeleteMoodEntry($input: DeleteMoodEntryInput!) {
+        deleteMoodEntry(input: $input) {
+          deletedId
+          clientMutationId
         }
       }
     `,
-    { id: entryId },
+    { input: { id: entryId } },
     { db, userId }
   );
   assert.ok(!deleteResult.errors);
-  assert.equal(deleteResult.data.deleteMoodEntry.deleted, true);
+  assert.equal(deleteResult.data.deleteMoodEntry.deletedId, entryId);
 });
 
 test.after(async () => {

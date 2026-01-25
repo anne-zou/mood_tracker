@@ -1,17 +1,13 @@
 import emojiRegex from 'emoji-regex';
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { graphql, useLazyLoadQuery } from 'react-relay';
 import { GRAY_TEXT } from '../../styles/colors';
 import { MOOD_INPUT_BAR_HEIGHT } from '../../styles/textStyles';
 import EmojiRow from './EmojiRow';
 import EmojiEditRow from './EmojiEditRow';
-import { useMutation, useQuery } from '@apollo/client/react';
-import {
-  QUERY_EMOJI_CONFIG,
-  UPSERT_EMOJI_CONFIG,
-  QueryEmojiConfigResponse,
-  UpsertEmojiConfigResponse,
-} from '../../lib/graphql/emojiConfigs';
+import { upsertEmojiConfig } from '../../lib/relay/mutations/UpsertEmojiConfigMutation';
+import type { EmojiSelectorQuery } from '../__generated__/EmojiSelectorQuery.graphql';
 
 type EmojiSelectorProps = {
   onEmojiPress: (emoji: string) => void;
@@ -25,6 +21,18 @@ const sanitizeEmojis = (value: string) => {
   return value.match(emojiRegex()) ?? [];
 };
 
+const EmojiSelectorQueryGraphQL = graphql`
+  query EmojiSelectorQuery {
+    emojiConfig {
+      id
+      userId
+      content
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export default function EmojiSelector({
   onEmojiPress,
   onEditingChange,
@@ -35,16 +43,15 @@ export default function EmojiSelector({
   const [isEditingEmojis, setIsEditingEmojis] = useState(false);
   const [emojiInput, setEmojiInput] = useState('');
 
-  const { data } = useQuery<QueryEmojiConfigResponse>(QUERY_EMOJI_CONFIG, {
-    skip: !enabled || typeof window === 'undefined',
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const [upsertEmojiConfig] = useMutation<UpsertEmojiConfigResponse>(UPSERT_EMOJI_CONFIG);
+  const data = useLazyLoadQuery<EmojiSelectorQuery>(
+    EmojiSelectorQueryGraphQL,
+    {},
+    { fetchPolicy: 'store-and-network' }
+  );
 
   const emojis = useMemo(() => {
-    return sanitizeEmojis(data?.queryEmojiConfig?.content ?? '');
-  }, [data?.queryEmojiConfig?.content]);
+    return sanitizeEmojis(data?.emojiConfig?.content ?? '');
+  }, [data?.emojiConfig?.content]);
 
   useEffect(() => {
     onEditingChange?.(isEditingEmojis);
@@ -64,30 +71,8 @@ export default function EmojiSelector({
     const nextContent = sanitizedEmojiInput.join('');
     setIsEditingEmojis(false);
     onFinishEditing?.();
-    const now = new Date().toISOString();
-    const optimisticConfig = {
-      __typename: 'EmojiConfig',
-      id: data?.queryEmojiConfig?.id ?? `temp-${Date.now()}`,
-      userId: data?.queryEmojiConfig?.userId ?? 'temp',
-      content: nextContent,
-      createdAt: data?.queryEmojiConfig?.createdAt ?? now,
-      updatedAt: now,
-    };
     try {
-      await upsertEmojiConfig({
-        variables: { content: nextContent },
-        optimisticResponse: {
-          upsertEmojiConfig: optimisticConfig,
-        },
-        update: (cache, { data: mutationData }) => {
-          const updated = mutationData?.upsertEmojiConfig;
-          if (!updated) return;
-          cache.writeQuery({
-            query: QUERY_EMOJI_CONFIG,
-            data: { queryEmojiConfig: updated },
-          });
-        },
-      });
+      await upsertEmojiConfig(nextContent, data?.emojiConfig);
     } catch (error) {
       console.error('Error saving emoji config:', error);
     }
@@ -115,7 +100,7 @@ export default function EmojiSelector({
           onEmojiPress={onEmojiPress}
           onActionPress={handleEditEmojis}
           actionIconColor={GRAY_TEXT}
-            hideAction={!data?.queryEmojiConfig}
+            hideAction={!data?.emojiConfig}
           dimmed={dimmed}
         />
       )}

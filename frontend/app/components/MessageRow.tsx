@@ -1,24 +1,33 @@
 import { View, StyleSheet } from 'react-native';
-import { MoodEntry } from './MessageList';
+import { graphql, useFragment } from 'react-relay';
 import MessageBubble from './MessageBubble';
 import MessageMetadata from './MessageMetadata';
+import type { MessageRow_entry$key } from '../__generated__/MessageRow_entry.graphql';
 
 type MessageRowProps = {
-  item: MoodEntry;
+  entry: MessageRow_entry$key;
   textColor: string;
   textSize: number;
   editingId: string | null;
   editingText: string;
   onChangeEditingText: (value: string) => void;
-  onStartEdit: (entry: MoodEntry) => void;
+  onStartEdit: () => void;
   onSaveEdit: () => void;
   onCancelEdit: () => void;
-  onDelete: (entryId: string) => void;
+  onDelete: () => void;
   dimAll?: boolean;
 };
 
+const MessageRowFragment = graphql`
+  fragment MessageRow_entry on MoodEntry {
+    id
+    ...MessageBubble_entry
+    ...MessageMetadata_entry
+  }
+`;
+
 export default function MessageRow({
-  item,
+  entry,
   textColor,
   textSize,
   editingId,
@@ -30,13 +39,14 @@ export default function MessageRow({
   onDelete,
   dimAll = false,
 }: MessageRowProps) {
-  const isEditingThis = editingId === item.id;
+  const data = useFragment(MessageRowFragment, entry);
+  const isEditingThis = editingId === data.id;
   const shouldDim = dimAll || (editingId !== null && !isEditingThis);
 
   return (
     <View style={styles.messageRow}>
       <MessageBubble
-        content={item.content}
+        entry={data}
         textColor={textColor}
         textSize={textSize}
         isEditing={isEditingThis}
@@ -46,7 +56,7 @@ export default function MessageRow({
         dimmed={shouldDim}
       />
       <MessageMetadata
-        item={item}
+        entry={data}
         textColor={textColor}
         isEditing={isEditingThis}
         onStartEdit={onStartEdit}

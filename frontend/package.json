@@ -9,10 +9,11 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "lint:fix": "expo lint --fix"
+    "lint:fix": "expo lint --fix",
+    "relay": "relay-compiler",
+    "relay:watch": "relay-compiler --watch"
   },
   "dependencies": {
-    "@apollo/client": "^4.1.0",
     "@expo/vector-icons": "^15.0.3",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
@@ -45,14 +46,20 @@
     "react-native-screens": "~4.16.0",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
+    "react-relay": "^20.1.1",
+    "relay-runtime": "^20.1.1",
     "tslib": "^2.8.1",
     "undici": "^7.18.2"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
     "@types/react-native": "^0.73.0",
+    "@types/react-relay": "^18.2.1",
+    "@types/relay-runtime": "^20.1.1",
+    "babel-plugin-relay": "^20.1.1",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "relay-compiler": "^20.1.1",
     "typescript": "~5.9.2"
   },
   "private": true
