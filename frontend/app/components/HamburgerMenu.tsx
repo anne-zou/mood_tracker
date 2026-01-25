@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { StyleSheet } from 'react-native';
 import { Menu, IconButton } from 'react-native-paper';
 import { DARK_NEUTRAL } from '../../styles/theme';
+import { createDimmedStyle } from '../../styles/dimming';
+import { useDimming } from '../hooks/useDimming';
 import { supabase } from '../../lib/supabase';
 
 export default function HamburgerMenu() {
   const [menuVisible, setMenuVisible] = useState(false);
+  const dimmed = useDimming();
 
   const handleSignOut = async () => {
     setMenuVisible(false);
@@ -21,6 +25,7 @@ export default function HamburgerMenu() {
           size={24}
           iconColor={DARK_NEUTRAL}
           onPress={() => setMenuVisible(true)}
+          style={dimmed && styles.dimmed}
         />
       }
     >
@@ -28,3 +33,7 @@ export default function HamburgerMenu() {
     </Menu>
   );
 }
+
+const styles = StyleSheet.create({
+  dimmed: createDimmedStyle(),
+});

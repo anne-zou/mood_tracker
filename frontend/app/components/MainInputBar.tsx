@@ -6,12 +6,13 @@ import { createDimmedStyle } from '../../styles/dimming';
 import { BASE_TEXT_SIZE, GRAY_TEXT, SCREEN_BACKGROUND, WHITE } from '../../styles/theme';
 import { useAppContext } from '../context/AppContext';
 import { createMoodEntry as createMoodEntryMutation } from '../../lib/relay/mutations/CreateMoodEntryMutation';
+import { useDimming } from '../hooks/useDimming';
 
 const INPUT_TEXT_COLOR = '#1f2933';
 
 const MainInputBar = forwardRef<any, {}>(function MainInputBar(_props, ref) {
   const { state, dispatch } = useAppContext();
-  const isEditingAny = !!state.editingEntryId;
+  const shouldDim = useDimming();
 
   /**
    * Handle main input submit to create a new mood entry
@@ -34,7 +35,7 @@ const MainInputBar = forwardRef<any, {}>(function MainInputBar(_props, ref) {
   }, [dispatch, state.mainInput, state.userId]);
 
   return (
-    <View style={[styles.inputBar, isEditingAny && styles.dimmed]}>
+    <View style={[styles.inputBar, shouldDim && styles.dimmed]}>
       <TextInput
         ref={ref}
         value={state.mainInput}

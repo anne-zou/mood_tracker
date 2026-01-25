@@ -8,6 +8,8 @@ import { createDimmedStyle } from '../../styles/dimming';
 import { MOOD_INPUT_BAR_HEIGHT } from '../../styles/textStyles';
 import { useAppContext } from '../context/AppContext';
 import type { EmojiRow_emojiConfig$key } from '../../__generated__/EmojiRow_emojiConfig.graphql';
+import { useDimming } from '../hooks/useDimming';
+import { EDITING_EMOJI_SELECTOR_ID } from '../reducers/appReducer';
 
 const sanitizeEmojis = (value: string) => {
   return value.match(emojiRegex()) ?? [];
@@ -25,7 +27,7 @@ type EmojiRowProps = {
 };
 
 export default function EmojiRow({ emojiConfig }: EmojiRowProps) {
-  const { state, dispatch } = useAppContext();
+  const { dispatch } = useAppContext();
 
   const data = useFragment(EmojiRowFragment, emojiConfig);
 
@@ -33,8 +35,7 @@ export default function EmojiRow({ emojiConfig }: EmojiRowProps) {
     return sanitizeEmojis(data?.content ?? '');
   }, [data?.content]);
 
-  // Dim if any mood entry is being edited
-  const dimmed = !!state.editingEntryId;
+  const shouldDim = useDimming(EDITING_EMOJI_SELECTOR_ID);
 
   const handleEmojiPress = (emoji: string) => {
     dispatch({ type: 'ADD_EMOJI_TO_MAIN_INPUT', payload: emoji });
@@ -48,7 +49,7 @@ export default function EmojiRow({ emojiConfig }: EmojiRowProps) {
   const hideAction = !emojiConfig;
 
   return (
-    <View style={[styles.emojiRow, dimmed && styles.dimmed]}>
+    <View style={[styles.emojiRow, shouldDim && styles.dimmed]}>
       {emojis.map((emoji) => (
         <Pressable key={emoji} onPress={() => handleEmojiPress(emoji)} style={styles.emojiButton}>
           <Text style={styles.emojiText}>{emoji}</Text>

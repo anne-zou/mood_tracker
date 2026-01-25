@@ -1,8 +1,8 @@
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { GRAY_TEXT } from '../../styles/theme';
-import { createDimmedStyle } from '../../styles/dimming';
-import { useAppContext } from '../context/AppContext';
+import { useDimming } from '../hooks/useDimming';
+import { createDimmedStyle } from '@/styles/dimming';
 
 type DateSeparatorProps = {
   timestamp: number;
@@ -30,11 +30,9 @@ const formatDate = (timestamp: number) => {
 };
 
 export default function DateSeparator({ timestamp }: DateSeparatorProps) {
-  const { state } = useAppContext();
-  const dimmed = !!state.editingEntryId;
-
+  const shouldDim = useDimming();
   return (
-    <View style={[styles.container, dimmed && styles.dimmed]}>
+    <View style={[styles.container, shouldDim && styles.dimmed]}>
       <View style={styles.line} />
       <Text style={styles.text}>{formatDate(timestamp)}</Text>
       <View style={styles.line} />

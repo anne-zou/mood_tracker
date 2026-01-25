@@ -7,6 +7,7 @@ import type { MessageMetadata_entry$key } from '../../__generated__/MessageMetad
 import { useAppContext } from '../context/AppContext';
 import { deleteMoodEntry as deleteMoodEntryMutation } from '../../lib/relay/mutations/DeleteMoodEntryMutation';
 import { updateMoodEntry as updateMoodEntryMutation } from '../../lib/relay/mutations/UpdateMoodEntryMutation';
+import { useDimming } from '../hooks/useDimming';
 
 type MessageMetadataProps = {
   entry: MessageMetadata_entry$key;
@@ -29,8 +30,7 @@ export default function MessageMetadata({
   const { id: entryId, time: entryTime, content } = data;
 
   const isEditingThis = state.editingEntryId === entryId;
-  const isEditingAny = state.editingEntryId !== null;
-  const shouldDim = !isEditingThis && isEditingAny;
+  const shouldDim = useDimming(entryId);
 
   /**
    * Handle start editing an entry

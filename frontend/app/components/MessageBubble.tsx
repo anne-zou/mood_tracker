@@ -8,6 +8,7 @@ import { fontConfig } from '../_layout';
 import { createDimmedStyle } from '../../styles/dimming';
 import { useAppContext } from '../context/AppContext';
 import type { MessageBubble_entry$key } from '../../__generated__/MessageBubble_entry.graphql';
+import { useDimming } from '../hooks/useDimming';
 
 type MessageBubbleProps = {
   entry: MessageBubble_entry$key;
@@ -24,12 +25,11 @@ export default function MessageBubble({
   entry,
 }: MessageBubbleProps) {
   const { state, dispatch } = useAppContext();
-  const data = useFragment(MessageBubbleFragment, entry);
+  const { id: entryId, content } = useFragment(MessageBubbleFragment, entry);
   const inputRef = useRef<RNTextInput>(null);
 
-  const isEditing = state.editingEntryId === data.id;
-  const isEditingAny = state.editingEntryId !== null;
-  const shouldDim = !isEditing && isEditingAny;
+  const isEditing = state.editingEntryId === entryId;
+  const shouldDim = useDimming(entryId);
 
   /**
    * Prevent user from switching focus away from the input while editing
@@ -41,7 +41,7 @@ export default function MessageBubble({
     }
   };
 
-  const rawText = isEditing ? state.editingEntryText : data.content;
+  const rawText = isEditing ? state.editingEntryText : content;
   // If the text ends in a newline, add a space to render the new line in the bubble
   const displayText = rawText.endsWith('\n') ? `${rawText} ` : rawText;
 

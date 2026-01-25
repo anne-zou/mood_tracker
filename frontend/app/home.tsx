@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import { SCREEN_BACKGROUND, DARK_NEUTRAL } from '../styles/theme';
-import { createDimmedStyle } from '../styles/dimming';
 import MainInputBar from './components/MainInputBar';
 import MessageList from './components/MessageList';
 import HamburgerMenu from './components/HamburgerMenu';
@@ -19,7 +18,7 @@ import { useAppContext } from './context/AppContext';
 
 function HomeScreenContent() {
   const router = useRouter();
-  const { state, dispatch, mainInputRef } = useAppContext();
+  const { dispatch, mainInputRef } = useAppContext();
 
   /**
    * Check if user is authenticated and set the user ID
@@ -45,15 +44,13 @@ function HomeScreenContent() {
     return () => subscription.unsubscribe();
   }, [router, dispatch]);
 
-  const isEditingAny = !!state.editingEntryId;
-
   /**
    * Render the home screen
    */
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <View style={[styles.header, isEditingAny && styles.dimmed]}>
+        <View style={styles.header}>
           <HamburgerMenu />
         </View>
         <KeyboardAvoidingView
@@ -108,5 +105,4 @@ const styles = StyleSheet.create({
   inner: {
     flex: 1,
   },
-  dimmed: createDimmedStyle(),
 });

@@ -4,64 +4,57 @@
  * IMPORTANT: When adding new UI components to the app, you MUST apply this dimming
  * pattern to ensure visual consistency during message edit mode.
  *
- * ## How to use:
+ * ## Recommended approach: Use the useDimming hook
  *
- * 1. Import the DIMMED_OPACITY constant and createDimmedStyle helper
- * 2. Add a `dimmed?: boolean` prop to your component
- * 3. Apply the dimmed style conditionally in your component
- * 4. Pass `dimmed={!!editingEntryId}` (or equivalent) from the parent
- *
- * ## Example:
+ * The `useDimming` hook centralizes all dimming logic - no need to manually check
+ * editingEntryId in every component:
  *
  * ```typescript
- * import { DIMMED_OPACITY, createDimmedStyle } from '../../styles/dimming';
+ * import { useDimming } from '../hooks/useDimming';
+ * import { createDimmedStyle } from '../../styles/dimming';
  *
- * type MyComponentProps = {
- *   content: string;
- *   dimmed?: boolean;
- * };
+ * export default function MyComponent() {
+ *   const dimmed = useDimming();
  *
- * export default function MyComponent({ content, dimmed = false }: MyComponentProps) {
  *   return (
  *     <View style={[styles.container, dimmed && styles.dimmed]}>
- *       <Text>{content}</Text>
+ *       <Text>Content</Text>
  *     </View>
  *   );
  * }
  *
  * const styles = StyleSheet.create({
- *   container: {
- *     padding: 10,
- *   },
+ *   container: { padding: 10 },
  *   dimmed: createDimmedStyle(),
  * });
  * ```
  *
+ * ## For list items that can be edited:
+ *
+ * Pass the item ID to prevent dimming the item being edited:
+ *
+ * ```typescript
+ * const dimmed = useDimming(message.id);
+ * <MessageBubble dimmed={dimmed} />
+ * ```
+ *
+ * ## Benefits of useDimming:
+ *
+ * - ✅ Single source of truth for edit state
+ * - ✅ Automatically handles all edge cases
+ * - ✅ No manual calculations in every component
+ * - ✅ Consistent behavior across the app
+ *
  * ## Which components need dimming?
  *
- * ALL leaf-level UI components that are visible during edit mode should support dimming:
+ * ALL visible UI components should support dimming:
  * - Input fields (except the one being edited)
- * - Buttons (except the save button for the edited entry)
+ * - Buttons (except save/cancel for the edited entry)
  * - Message bubbles (except the one being edited)
  * - Timestamps and metadata
  * - Date separators
  * - Navigation elements (header, menu)
  * - Any other interactive or visible elements
- *
- * ## When NOT to apply dimming:
- *
- * - The input being actively edited (check `isEditing` state)
- * - Action buttons for the edited entry (save, cancel)
- *
- * ## Pattern for message list items:
- *
- * For components in message lists, use this pattern:
- * ```typescript
- * const isEditing = editingId === item.id;
- * const isAnotherEditing = editingId !== null && !isEditing;
- *
- * <MyComponent dimmed={isAnotherEditing} />
- * ```
  */
 
 export const DIMMED_OPACITY = 0.3;
