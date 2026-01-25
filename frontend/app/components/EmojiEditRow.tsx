@@ -9,6 +9,8 @@ import { useAppContext } from '../context/AppContext';
 import { upsertEmojiConfig } from '../../lib/relay/mutations/UpsertEmojiConfigMutation';
 import type { EmojiEditRow_emojiConfig$key } from '../../__generated__/EmojiEditRow_emojiConfig.graphql';
 
+const SANITIZE_DELAY_MS = 500;
+
 const sanitizeEmojis = (value: string) => {
   return value.match(emojiRegex()) ?? [];
 };
@@ -39,6 +41,10 @@ export default function EmojiEditRow({ emojiConfig }: EmojiEditRowProps) {
 
   const [emojiInput, setEmojiInput] = useState(initialEmojis);
 
+  const [selection, setSelection] = useState<{ start: number; end: number } | undefined>(undefined);
+  const sanitizeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cursorPositionRef = useRef<number>(initialEmojis.length);
+
   /**
    * Focus the input when the component mounts
    */
@@ -47,6 +53,40 @@ export default function EmojiEditRow({ emojiConfig }: EmojiEditRowProps) {
       inputRef.current.focus();
     }
   }, []);
+
+  /**
+   * Auto-sanitize emoji input with debounce while preserving cursor position
+   */
+  useEffect(() => { // Executes on input change
+    // Clear existing timeout 
+    if (sanitizeTimeoutRef.current) {
+      clearTimeout(sanitizeTimeoutRef.current);
+    }
+
+    // Set up new timeout to sanitize input after delay
+    sanitizeTimeoutRef.current = setTimeout(() => {
+      const sanitized = sanitizeEmojis(emojiInput).join('');
+      if (sanitized !== emojiInput) {
+        // Calculate new cursor position based on removed characters
+        const originalCursorPos = cursorPositionRef.current;
+
+        // Count valid emojis before the cursor position
+        const emojisBeforeCursor = sanitizeEmojis(emojiInput.substring(0, originalCursorPos));
+        const newCursorPos = emojisBeforeCursor.join('').length;
+
+        // Update input and cursor position together
+        setEmojiInput(sanitized);
+        setSelection({ start: newCursorPos, end: newCursorPos });
+      }
+    }, SANITIZE_DELAY_MS);
+
+    // Clean up timeout on unmount
+    return () => {
+      if (sanitizeTimeoutRef.current) {
+        clearTimeout(sanitizeTimeoutRef.current);
+      }
+    };
+  }, [emojiInput]);
 
   /**
    * Prevent user from switching focus away from the input while editing
@@ -58,6 +98,9 @@ export default function EmojiEditRow({ emojiConfig }: EmojiEditRowProps) {
     }
   };
 
+  /**
+   * Save the emoji input to the database
+   */
   const handleSave = async () => {
     const sanitizedEmojiInput = sanitizeEmojis(emojiInput);
     const nextContent = sanitizedEmojiInput.join('');
@@ -69,9 +112,19 @@ export default function EmojiEditRow({ emojiConfig }: EmojiEditRowProps) {
     }
   };
 
+  /**
+   * Cancel the emoji input and reset to initial state
+   */
   const handleCancel = () => {
     setEmojiInput(initialEmojis);
     dispatch({ type: 'FINISH_EDIT_EMOJIS' });
+  };
+
+  /**
+   * Track the cursor position on selection change
+   */
+  const handleSelectionChange = (event: any) => {
+    cursorPositionRef.current = event.nativeEvent.selection.start;
   };
 
   return (
@@ -81,6 +134,8 @@ export default function EmojiEditRow({ emojiConfig }: EmojiEditRowProps) {
         ref={inputRef}
         value={emojiInput}
         onChangeText={setEmojiInput}
+        onSelectionChange={handleSelectionChange}
+        selection={selection}
         mode="outlined"
         dense
         returnKeyType="done"
