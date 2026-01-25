@@ -154,14 +154,14 @@ export default function EmojiEditRow({ emojiConfig }: EmojiEditRowProps) {
         size={16}
         iconColor={GRAY_TEXT}
         onPress={handleSave}
-        style={styles.saveButton}
+        style={styles.saveAndCancelButtons}
       />
       <IconButton
         icon="close"
         size={16}
         iconColor={GRAY_TEXT}
         onPress={handleCancel}
-        style={styles.saveButton}
+        style={styles.saveAndCancelButtons}
       />
     </View>
   );
@@ -179,13 +179,16 @@ const styles = StyleSheet.create({
   editLabel: {
     color: GRAY_TEXT,
     paddingLeft: 12,
+    flexShrink: 0,
   },
   editInput: {
     height: MOOD_INPUT_BAR_HEIGHT,
+    flex: 1,
   },
-  saveButton: {
+  saveAndCancelButtons: {
     margin: 0,
     width: 28,
     height: 28,
+    flexShrink: 0,
   },
 });
